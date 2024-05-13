@@ -1,56 +1,93 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import { useState, useMemo, useCallback } from "react";
+import Map, {
+  Marker,
+  Popup,
+  NavigationControl,
+  FullscreenControl,
+  ScaleControl,
+  GeolocateControl,
+} from "react-map-gl";
+import Pin from "../atoms/pins";
 
-// interface MovingObject {
-//   id: number;
-//   name: string;
-//   coordinates: number[];
-// }
+import CITIES from "../data/mock-data.json";
 
-const MapComponent: React.FC = () => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any>(null);
+const TOKEN =
+  "pk.eyJ1IjoicHJha2FzaHB1bjIyIiwiYSI6ImNsdzUzd3J5cjFoaTQya242YTgzcXlvZncifQ.frgsDUb2l3D8ZolT50Ab1w"; // Set your mapbox token here
+
+export const MapComponent = () => {
+  const [popupInfo, setPopupInfo] = useState<any>(null);
   const [lng, setLng] = useState(-79.3323053);
   const [lat, setLat] = useState(43.7535611);
   const [zoom, setZoom] = useState(9);
 
-  useEffect(() => {
-    mapboxgl.accessToken =
-      "pk.eyJ1IjoicHJha2FzaHB1bjIyIiwiYSI6ImNsdzUzd3J5cjFoaTQya242YTgzcXlvZncifQ.frgsDUb2l3D8ZolT50Ab1w";
+  const pins = useMemo(
+    () =>
+      CITIES.map((city, index) => (
+        <Marker
+          key={`marker-${index}`}
+          longitude={city.longitude}
+          latitude={city.latitude}
+          anchor="bottom"
+          onClick={(e) => {
+            // If we let the click event propagates to the map, it will immediately close the popup
+            // with `closeOnClick: true`
+            e.originalEvent.stopPropagation();
+            setPopupInfo(city);
+          }}
+        >
+          <Pin />
+        </Marker>
+      )),
+    []
+  );
 
-    if (mapContainer.current) {
-      if (map.current) return; // initialize map only once
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: "mapbox://styles/mapbox/streets-v12",
-        center: [lng, lat],
-        zoom: zoom,
-        maxZoom: 15,
-      });
-
-      // Add zoom controls
-      map.current.addControl(new mapboxgl.NavigationControl(), "top-left");
-
-      // Add your custom markers and lines here
-      map.current.on("move", () => {
-        setLng(map.current.getCenter().lng.toFixed(4));
-        setLat(map.current.getCenter().lat.toFixed(4));
-        setZoom(map.current.getZoom().toFixed(2));
-      });
-
-      // Clean up on unmount
-    }
-  }, [lat, lng, zoom]);
+  const onMarkerDrag = useCallback((event: any) => {
+    setLat(event?.viewState?.latitude.toFixed(4));
+    setLng(event.viewState.longitude.toFixed(4));
+    setZoom(event?.viewState?.zoom?.toFixed(2));
+  }, []);
 
   return (
     <div>
-      <div className="sidebar">
-        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+      <div className="map-container">
+        <div className="sidebar">
+          Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+        </div>
+        <Map
+          initialViewState={{
+            latitude: 43.7535611,
+            longitude: -79.3323053,
+            zoom: 10,
+            bearing: 0,
+            pitch: 0,
+          }}
+          mapStyle="mapbox://styles/mapbox/streets-v12"
+          mapboxAccessToken={TOKEN}
+          onDrag={onMarkerDrag}
+        >
+          <GeolocateControl position="top-left" />
+          <FullscreenControl position="top-left" />
+          <NavigationControl position="top-left" />
+          <ScaleControl />
+
+          {pins}
+
+          {popupInfo && (
+            <Popup
+              anchor="top"
+              longitude={Number(popupInfo.longitude)}
+              latitude={Number(popupInfo.latitude)}
+              onClose={() => setPopupInfo(null)}
+            >
+              <div>
+                {popupInfo.city}, {popupInfo.state} |{" "}
+              </div>
+              <img width="100%" src={popupInfo.image} />
+            </Popup>
+          )}
+        </Map>
       </div>
-      <div ref={mapContainer} style={{ height: "90vh" }} />
     </div>
   );
 };
-
-export { MapComponent };
