@@ -1,12 +1,16 @@
 import boto3
 from botocore.exceptions import NoCredentialsError
+from dotenv import load_dotenv
+import os
 
-# AWS credentials (replace these with your own)
-AWS_ACCESS_KEY = 'AKIA5FTZDJFWTITGXH5B'
-AWS_SECRET_KEY = 'esBkizsCWrMfA/OnmQdLGcp+/Oy3Ui2RuDwmVZxZ'
+# Load environment variables from .env file
+load_dotenv("aws_credentials.env")
+
+
+# Constants for AWS region and S3 bucket name
+AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
+AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')
 AWS_REGION = 'us-east-1'
-S3_BUCKET_NAME = 'spotfinder-data-bucket'
+s3_bucket_name = 'spotfinder-data-bucket'
 
-# Create an S3 client
 s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY, region_name=AWS_REGION)
-

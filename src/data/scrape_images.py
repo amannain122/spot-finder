@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 import time
 import os
 import urllib.request
-from aws import s3, S3_BUCKET_NAME
+from aws import s3, s3_bucket_name
 import io
 
 # Function to scroll to the bottom of the page
@@ -18,7 +18,7 @@ def scroll_to_bottom(driver):
         last_height = new_height
 
 # Target search term
-search_term = "cars in parking lot with empty spaces"
+search_term = "car in parking lot "
 
 # URL of Google Images with search term
 url = "https://www.google.com/search?q=" + search_term + "&source=lnms&tbm=isch"
@@ -51,8 +51,8 @@ limit = 5
 count = 0
 
 # Define a minimum width and height threshold for images (adjust as needed)
-MIN_WIDTH = 100
-MIN_HEIGHT = 100
+MIN_WIDTH = 150
+MIN_HEIGHT = 150
 
 try:
     # Save images to S3
@@ -73,7 +73,7 @@ try:
                     # Define the object key with folder structure
                     image_key = f"{folder_name}/{search_term}_{count}.jpg"
                     # Upload the image to S3
-                    s3.upload_fileobj(image_fileobj, S3_BUCKET_NAME, image_key)
+                    s3.upload_fileobj(image_fileobj, s3_bucket_name, image_key)
                     print(f"Image {count+1} uploaded to S3 successfully.")
                     count += 1
                     if count >= limit:
