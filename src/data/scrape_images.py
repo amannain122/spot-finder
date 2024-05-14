@@ -18,7 +18,7 @@ def scroll_to_bottom(driver):
         last_height = new_height
 
 # Target search term
-search_term = "car in parking lot "
+search_term = "parking lots with spaces  "
 
 # URL of Google Images with search term
 url = "https://www.google.com/search?q=" + search_term + "&source=lnms&tbm=isch"

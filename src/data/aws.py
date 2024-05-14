@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 import os
 
 # Load environment variables from .env file
-load_dotenv(".env")
-
+load_dotenv()
 
 # Constants for AWS region and S3 bucket name
 AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
