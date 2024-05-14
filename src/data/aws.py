@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 
 # Load environment variables from .env file
-load_dotenv("aws_credentials.env")
+load_dotenv(".env")
 
 
 # Constants for AWS region and S3 bucket name
