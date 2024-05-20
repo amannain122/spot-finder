@@ -12,6 +12,9 @@ export default defineConfig({
   preview: {
     port: 4000,
   },
+  build: {
+    outDir: "./dist",
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
