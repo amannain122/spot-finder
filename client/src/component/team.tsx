@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -64,7 +66,6 @@ export const TeamAvatar = ({ username }: { username: string }) => {
     "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
   );
   // https://api.github.com/users/prakash-pun
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [, setLoading] = useState(true);
 
   useEffect(() => {

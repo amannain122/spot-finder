@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 const BackBtn = () => {
   return (
     <div className="flex h-7 w-7 items-center justify-center rounded-md border transition-all hover:bg-black/5 cursor-pointer">
-      <Link className="cursor-pointer" to={"/"}>
+      <Link className="cursor-pointer" href={"/"}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

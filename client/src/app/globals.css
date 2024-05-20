@@ -74,7 +74,6 @@
     @apply bg-background text-foreground;
   }
 }
-
 .map-container {
   margin: 2rem 0rem;
   height: 60vh;

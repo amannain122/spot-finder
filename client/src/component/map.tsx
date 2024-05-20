@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import { useState, useMemo, useCallback } from "react";
 import Map, {
   Marker,
@@ -9,6 +8,7 @@ import Map, {
   ScaleControl,
   GeolocateControl,
 } from "react-map-gl";
+import axios from "axios";
 import Pin from "../atoms/pins";
 
 import CITIES from "../data/mock-data.json";
@@ -21,6 +21,7 @@ export const MapComponent = () => {
   const [, setLng] = useState(-79.3323053);
   const [, setLat] = useState(43.7535611);
   const [, setZoom] = useState(9);
+  const [pointer, setPointer] = useState<any>();
 
   const pins = useMemo(
     () =>
@@ -47,6 +48,29 @@ export const MapComponent = () => {
     setZoom(event?.viewState?.zoom?.toFixed(2));
   }, []);
 
+  const handleClick = async (event: any) => {
+    const { lngLat }: any = event;
+    try {
+      const response = await axios.get(
+        `https://api.mapbox.com/search/geocode/v6/reverse`,
+        {
+          params: {
+            longitude: lngLat.lng,
+            latitude: lngLat.lat,
+            access_token: TOKEN,
+          },
+        }
+      );
+
+      const placeName =
+        response?.data?.features[0]?.properties?.full_address ||
+        "Unknown location";
+      setPointer({ lat: lngLat.lat, lng: lngLat.lng, address: placeName });
+    } catch (error) {
+      console.error("Error with reverse geocoding: ", error);
+    }
+  };
+
   return (
     <div className="map-container rounded-sm">
       {/* <div className="sidebar">
@@ -63,6 +87,7 @@ export const MapComponent = () => {
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={TOKEN}
         onDrag={onMarkerDrag}
+        onClick={handleClick}
       >
         <GeolocateControl position="top-left" />
         <FullscreenControl position="top-left" />
@@ -82,6 +107,22 @@ export const MapComponent = () => {
               {popupInfo.city}, {popupInfo.state} |{" "}
             </div>
             <img width="100%" src={popupInfo.image} />
+          </Popup>
+        )}
+        {pointer?.address && (
+          <Popup
+            anchor="top"
+            longitude={Number(pointer?.lng || -79.3323053)}
+            latitude={Number(pointer?.lat || 43.7535611)}
+            onClose={() => setPointer(null)}
+          >
+            <div>{pointer?.address || ""}</div>
+            {/* <img
+              width="100%"
+              src={
+                "http://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Above_Gotham.jpg/240px-Above_Gotham.jpg"
+              }
+            /> */}
           </Popup>
         )}
       </Map>
