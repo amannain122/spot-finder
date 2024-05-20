@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useCallback } from "react";
 import Map, {
@@ -17,9 +18,9 @@ const TOKEN =
 
 export const MapComponent = () => {
   const [popupInfo, setPopupInfo] = useState<any>(null);
-  const [lng, setLng] = useState(-79.3323053);
-  const [lat, setLat] = useState(43.7535611);
-  const [zoom, setZoom] = useState(9);
+  const [, setLng] = useState(-79.3323053);
+  const [, setLat] = useState(43.7535611);
+  const [, setZoom] = useState(9);
 
   const pins = useMemo(
     () =>

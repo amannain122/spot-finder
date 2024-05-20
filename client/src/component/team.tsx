@@ -64,7 +64,7 @@ export const TeamAvatar = ({ username }: { username: string }) => {
   );
   // https://api.github.com/users/prakash-pun
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAvatar = async () => {
