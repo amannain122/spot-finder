@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+
 const people = [
   {
     name: "Leandro Sartini De Campos",
