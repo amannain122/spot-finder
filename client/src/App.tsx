@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Home, AboutPage, TeamPage } from "./pages";
+import { Home, AboutPage } from "./pages";
 import ErrorPage from "./pages/error-page";
 
 function App() {
@@ -9,11 +9,6 @@ function App() {
     {
       path: "/about",
       element: <AboutPage />,
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/teams",
-      element: <TeamPage />,
       errorElement: <ErrorPage />,
     },
   ]);

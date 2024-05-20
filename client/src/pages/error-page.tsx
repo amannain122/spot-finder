@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import BackBtn from "@/atoms/back-btn";
 import { useRouteError } from "react-router-dom";
 
 export default function ErrorPage() {
@@ -11,7 +12,7 @@ export default function ErrorPage() {
       <p>
         <i>{error.statusText || error.message}</i>
       </p>
-      {/* <BackBtn /> */}
+      <BackBtn />
     </div>
   );
 }
