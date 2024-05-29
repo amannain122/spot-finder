@@ -22,12 +22,12 @@ const people = [
   {
     name: "Gurbachan Singh",
     role: "Data Analyst - Dashboard Specialist",
-    username: "",
+    username: "gurbachansingh2000",
   },
   {
     name: "Ogechi Tina Ukanwune",
     role: "Data Analyst - Insights Specialist",
-    username: "",
+    username: "tinaOge",
   },
   {
     name: "Bibek Ranjit",
@@ -57,7 +57,7 @@ const people = [
   {
     name: "Jisna D Kunju",
     role: "UI/UX Specialist",
-    username: "",
+    username: "7994581443",
   },
 ];
 
@@ -115,10 +115,7 @@ export const Team = () => {
             Meet our Team
           </h2>
           <p className="mt-6 text-lg leading-8 text-gray-600">
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quasi in,
-            ad saepe consequatur vero voluptate odit, asperiores quaerat vel
-            molestias quod illo quos. Totam cupiditate reiciendis sunt rerum rem
-            laudantium!
+            We are a team of 11 members working on this project.
           </p>
         </div>
         <ul

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   NavigationMenu,
@@ -94,7 +95,19 @@ export const Header = () => {
         <img src="/logo.jpeg" className="w-12 mr-6" />
         <NavigationMenuDemo />
       </div>
-      <div>
+      <div className="flex justify-center items-center gap-4">
+        <Link href="/login">
+          <button className="bg-gray-100 text-black py-2 px-4 rounded-sm">
+            Login
+          </button>
+        </Link>
+
+        <Link className="" href="/register">
+          <button className="bg-green-300 text-black py-2 px-4 rounded-sm">
+            Register
+          </button>
+        </Link>
+
         <a href="https://github.com/amannain122/spot-finder" target="_blank">
           <GitHubIcons />
         </a>

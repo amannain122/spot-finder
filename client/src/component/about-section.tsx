@@ -10,10 +10,11 @@ export const AboutSection = () => {
             A Parking Sport Finder App
           </p>
           <p className="mt-6 text-lg leading-8 text-gray-600">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus
-            quis perferendis, mollitia illo voluptatibus sit, officiis vero
-            consequuntur, facere illum ea totam incidunt? Id rerum vel, soluta
-            repellat totam quos!
+            Spot Finder utilizes object detection to identify and locate
+            available parking spots. Provides real-time updates on parking
+            availability. Offers a user-friendly interface for seamless
+            naviation. Spotfinder optimizes urban mobility by streamiling the
+            parking process.
           </p>
         </div>
       </div>

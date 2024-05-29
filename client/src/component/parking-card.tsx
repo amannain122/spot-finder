@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// ParkingLotEntry.js
-
 const ParkingLotCard = ({
   image,
   address,

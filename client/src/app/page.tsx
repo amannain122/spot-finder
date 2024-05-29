@@ -7,6 +7,7 @@ const Home = () => {
   return (
     <div className="p-width m-4 relative">
       <Header />
+      <br />
       <SearchBox />
       <div className="min-h-screen flex">
         <div className="w-2/3 p-2">
