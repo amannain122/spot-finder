@@ -35,7 +35,7 @@ chrome_options.add_argument("--no-proxy-server")
 webdriver_path = "D:\chromedriver-win64\chromedriver.exe"  
 
 # Create a directory to save images
-folder_name = "scraped_images"
+folder_name = "D:\Python\scraped_images"
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 
