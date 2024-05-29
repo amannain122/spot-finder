@@ -29,5 +29,3 @@ def upload_to_s3(file_path):
         print("AWS credentials not available.")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-
-# Now you can use the upload_to_s3 function in your main script to upload files to AWS S3.
