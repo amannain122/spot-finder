@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+
+import { LoginForm } from "@/component/form";
 
 export const metadata: Metadata = {
   title: "Login | Spot Finder",
@@ -13,7 +12,7 @@ const LoginPage = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-200 to-green-200">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h2 className="mb-6 text-2xl font-bold text-center">Create Account</h2>
+        <h2 className="mb-6 text-2xl font-bold text-center">Login</h2>
         <p className="mb-8 text-center">
           Login in to{" "}
           <Link href={"/"}>
@@ -22,19 +21,7 @@ const LoginPage = () => {
           </Link>{" "}
           and Find Your best Parking
         </p>
-        <form>
-          <div className="mb-6">
-            <Label htmlFor="email">Email</Label>
-            <Input type="email" id="email" required />
-          </div>
-          <div className="mb-6">
-            <Label htmlFor="password">Password</Label>
-            <Input type="password" required />
-          </div>
-          <Button className="w-full" type="submit">
-            Login
-          </Button>
-        </form>
+        <LoginForm />
         <div className="text-center mt-4 flex flex-col justify-center items-center gap-4">
           <p>Don't have an account?</p>
           <Link href="/register" className="text-sm text-blue-600">

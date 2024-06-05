@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { RegisterForm } from "@/component/form";
 
 export const metadata: Metadata = {
   title: "Register | Spot Finder",
@@ -21,27 +22,7 @@ const RegisterPage = () => {
           </Link>{" "}
           and Find Your best Parking
         </p>
-        <form>
-          <div className="mb-4">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input type="text" id="firstName" placeholder="" />
-          </div>
-          <div className="mb-4">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input type="text" required />
-          </div>
-          <div className="mb-6">
-            <Label htmlFor="email">Email</Label>
-            <Input type="email" id="email" required />
-          </div>
-          <div className="mb-6">
-            <Label htmlFor="password">Password</Label>
-            <Input type="password" required />
-          </div>
-          <Button className="w-full" type="submit">
-            Create Account
-          </Button>
-        </form>
+        <RegisterForm />
         <div className="text-center mt-4 flex flex-col justify-center items-center gap-4">
           <p>Already have an account?</p>
           <Link href="/login" className="text-sm text-blue-600">
