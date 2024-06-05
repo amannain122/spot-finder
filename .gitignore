@@ -88,3 +88,11 @@ target/
 .mypy_cache/
 
 .vercel
+
+venv
+djangoenv
+virtuanenv
+*__pycache__/
+*migrations*
+.env
+db.sqlite3
