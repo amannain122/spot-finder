@@ -145,8 +145,8 @@ export const Header = () => {
               </MenubarTrigger>
               <MenubarContent>
                 <MenubarItem onClick={handleProfile}>Profile</MenubarItem>
-                <MenubarItem onClick={handleLogout}>Logout</MenubarItem>
                 <MenubarSeparator />
+                <MenubarItem onClick={handleLogout}>Logout</MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
