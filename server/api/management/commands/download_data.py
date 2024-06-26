@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 import csv
 
+
 class Command(BaseCommand):
     help = 'Downloads data from Redshift and saves it to a CSV file'
 
@@ -25,6 +26,7 @@ class Command(BaseCommand):
 
             # Fetch all rows
             rows = cur.fetchall()
+            print(rows)
 
             # Specify the path to save the CSV file
             csv_file_path = 'data.csv'
@@ -37,7 +39,8 @@ class Command(BaseCommand):
                 # Write data rows
                 csv_writer.writerows(rows)
 
-            self.stdout.write(self.style.SUCCESS(f"Data downloaded and saved to '{csv_file_path}'"))
+            self.stdout.write(self.style.SUCCESS(
+                f"Data downloaded and saved to '{csv_file_path}'"))
 
             # Close cursor and connection
             cur.close()
