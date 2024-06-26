@@ -13,7 +13,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer
-
+from django.http import JsonResponse
+from django.db import connection
 from .models import User
 
 
@@ -96,3 +97,17 @@ class PostList(generics.ListCreateAPIView):
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     pass
+
+
+def list_redshift_tables(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT table_schema, table_name
+            FROM information_schema.tables
+            WHERE table_type = 'BASE TABLE'
+              AND table_schema NOT IN ('information_schema', 'pg_catalog')
+        """)
+        rows = cursor.fetchall()
+        columns = [col[0] for col in cursor.description]
+        data = [dict(zip(columns, row)) for row in rows]
+    return JsonResponse(data, safe=False)
