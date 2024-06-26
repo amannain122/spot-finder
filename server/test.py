@@ -75,14 +75,14 @@ conn = redshift_connector.connect(
 )
 
 cursor: redshift_connector.Cursor = conn.cursor()
-cursor.execute("create Temp table parking(bookname varchar,author varchar)")
-cursor.executemany("insert into book (bookname, author) values (%s, %s)",
+cursor.execute("create Temp table parking(locationName varchar,space varchar)")
+cursor.executemany("insert into parking (locationName, space) values (%s, %s)",
                    [
-                       ('One Hundred Years of Solitude', 'Gabriel García Márquez'),
-                       ('A Brief History of Time', 'Stephen Hawking')
+                       ('Bloor Younge', '10'),
+                       ('4000 victoria park', '20')
                    ]
                    )
-cursor.execute("select * from book")
+cursor.execute("select * from parking")
 
 result: tuple = cursor.fetchall()
 print(result)
