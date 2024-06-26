@@ -88,23 +88,23 @@ TEMPLATES = [
     },
 ]
 
+DATABASES = {
+         'default': {
+        'ENGINE': 'django_redshift_backend',
+        'NAME': 'dev',
+        'USER': 'awsuser',
+        'PASSWORD': 'Anjitha97',
+        'HOST': 'redshift-cluster-1.cqyedsmaziep.us-east-2.redshift.amazonaws.com',
+        'PORT': '5439',
+    }
+    
+}
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': env('DB_NAME'),
-#         'USER': env('superuser'),
-#         'PASSWORD': env('DB_PASSWORD'),
-#         'HOST': env('DB_HOST'),
-#         'PORT': env('DB_PORT'),
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
 WSGI_APPLICATION = 'core.wsgi.application'
