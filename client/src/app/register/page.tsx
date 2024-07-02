@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   title: "Register | Spot Finder",
   description: "Step Project",
 };
-
 const RegisterPage = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-200 to-green-200">
@@ -46,6 +45,9 @@ const RegisterPage = () => {
           <p>Already have an account?</p>
           <Link href="/login" className="text-sm text-blue-600">
             Login
+          </Link>
+          <Link href="profile/select-parking" className="text-sm text-blue-600">
+            Select parking
           </Link>
           <Link href={"/"} className="text-center">
             <svg
