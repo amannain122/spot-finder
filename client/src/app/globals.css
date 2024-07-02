@@ -79,6 +79,11 @@
   height: 60vh;
 }
 
+.map-detail-container {
+  margin: 2rem 0rem;
+  height: 40vh;
+}
+
 .sidebar {
   background-color: rgb(35 55 75 / 90%);
   color: #fff;
