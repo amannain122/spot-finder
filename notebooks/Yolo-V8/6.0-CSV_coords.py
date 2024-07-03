@@ -93,9 +93,9 @@ while True:
         prev_empty_boxes = empty_boxes
 
     # Display the frame
-    cv2.imshow('Result', frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    #cv2.imshow('Result', frame)
+    #if cv2.waitKey(1) & 0xFF == ord('q'):
+    #    break
 
 # Release video capture
 cap.release()
