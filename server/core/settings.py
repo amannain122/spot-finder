@@ -103,19 +103,18 @@ TEMPLATES = [
 # }
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # },
     'default': {
-        'ENGINE': 'django_redshift_backend',
-        'NAME': 'dev',
-        'USER': 'awsuser',
-        'PASSWORD': 'Anjitha97',
-        'HOST': 'redshift-cluster-1.cqyedsmaziep.us-east-2.redshift.amazonaws.com',
-        'PORT': '5439',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     },
-
+    # 'default': {
+    #     'ENGINE': 'django_redshift_backend',
+    #     'NAME': 'dev',
+    #     'USER': 'awsuser',
+    #     'PASSWORD': 'Anjitha97',
+    #     'HOST': 'redshift-cluster-1.cqyedsmaziep.us-east-2.redshift.amazonaws.com',
+    #     'PORT': '5439',
+    # },
 }
 
 

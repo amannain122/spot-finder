@@ -76,3 +76,52 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id', 'coordinates', 'availability', 'capacity',
                   'available_space', 'price', 'time_restrictions')
+
+
+class CoordinatesSerializer(serializers.Serializer):
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+
+
+class ParkingStatusSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    coordinates = CoordinatesSerializer()
+    total_spots = serializers.IntegerField()
+    available_spots = serializers.IntegerField()
+    reserved_spots = serializers.IntegerField()
+    spots = serializers.ListField(
+        child=serializers.DictField(
+            child=serializers.CharField()
+        )
+    )
+
+# {
+# 	"parkingSpots": [
+# 		{
+# 			"id": "1",
+# 			"coordinates": {
+# 				"latitude": 40.7128,
+# 				"longitude": -74.0060
+# 			}
+# 			"availability": "vacant",
+# 			"type": "street",
+# 			"capacity": 10,
+# 			"availableSpace": 2,
+# 			"price": 5.00,
+# 			"timeRestrictions": "No restrictions"
+# 		},
+# 		{
+# 			"id": "2",
+# 			"coordinates": {
+# 				"latitude": 40.7306,
+# 				"longitude": -73.9352
+# 			}
+# 			"availability": "occupied",
+# 			"type": "garage",
+# 			"capacity": 50,
+# 			"availableSpace": 2,
+# 			"price": 10.00,
+# 			"timeRestrictions": "2-hour limit"
+# 		},
+# 	]
+# }
