@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from ultralytics import YOLO
-import pafy
+import yt_dlp
 import pandas as pd
 
 # Load the YOLO model
@@ -24,16 +24,15 @@ for i in range(len(data)):
     bounding_box_areas.append(coords)
 
 # Set up video streaming
+ydl_opts = {
+    'format': 'best[height=720]',
+    'noplaylist': True
+}
 try:
-    video = pafy.new(video_url)
-    streams = video.streams
-
-    desired_resolution = "1280x720"
-    stream = next((s for s in video.streams if s.resolution == desired_resolution), None)
-    if stream is None:
-        print(f"Desired resolution {desired_resolution} not found. Falling back to the best available stream.")
-        stream = video.getbest(preftype="mp4")
-    cap = cv2.VideoCapture(stream.url)
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(video_url, download=False)
+        video_url = info_dict['url']
+    cap = cv2.VideoCapture(video_url)
 except Exception as e:
     print(f"Error loading video: {e}")
     exit()
