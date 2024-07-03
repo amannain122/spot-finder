@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   NavigationMenu,
@@ -11,6 +12,16 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarShortcut,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
+import { getJwtToken } from "@/lib/server";
 
 export const GitHubIcons = () => {
   return (
@@ -42,17 +53,25 @@ export function NavigationMenuDemo() {
                       Spot Finder
                     </div>
                     <p className="text-sm leading-tight text-muted-foreground">
-                      AI and DS Step Group Project
+                      AI and DS Step Group Project/Parking Spot Finder
                     </p>
                   </a>
                 </NavigationMenuLink>
               </li>
-              <ListItem href="/" title="App">
-                Parking Space Finder
-              </ListItem>
               <ListItem href="/about" title="About">
                 About The Project, Teams Members
               </ListItem>
+
+              <ListItem
+                href="/login"
+                title="Login"
+                className="lg:hidden md:hidden sm:block"
+              ></ListItem>
+              <ListItem
+                href="/register"
+                title="Register"
+                className="lg:hidden md:hidden sm:block"
+              ></ListItem>
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
@@ -89,6 +108,23 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export const Header = () => {
+  const router = useRouter();
+  const [token, setToken] = useState("");
+
+  useEffect(
+    () => () => {
+      const token = getJwtToken();
+      setToken(token || "");
+    },
+    []
+  );
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
+  const handleProfile = () => {
+    router.push("/profile");
+  };
   return (
     <div className="flex items-center h-16 justify-between">
       <div className="flex items-center">
@@ -96,17 +132,47 @@ export const Header = () => {
         <NavigationMenuDemo />
       </div>
       <div className="flex justify-center items-center gap-4">
-        <Link href="/login">
-          <button className="bg-gray-100 text-black py-2 px-4 rounded-sm">
-            Login
-          </button>
-        </Link>
+        {token ? (
+          <Menubar>
+            <MenubarMenu>
+              <MenubarTrigger>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                  />
+                </svg>
+              </MenubarTrigger>
+              <MenubarContent>
+                <MenubarItem onClick={handleProfile}>Profile</MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem onClick={handleLogout}>Logout</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+          </Menubar>
+        ) : (
+          <div className="hidden lg:block md:block">
+            <Link href="/login">
+              <button className="bg-gray-100 text-black py-2 px-4 mr-2 rounded-sm">
+                Login
+              </button>
+            </Link>
 
-        <Link className="" href="/register">
-          <button className="bg-green-300 text-black py-2 px-4 rounded-sm">
-            Register
-          </button>
-        </Link>
+            <Link className="" href="/register">
+              <button className="bg-green-300 text-black py-2 px-4 rounded-sm">
+                Register
+              </button>
+            </Link>
+          </div>
+        )}
 
         <a href="https://github.com/amannain122/spot-finder" target="_blank">
           <GitHubIcons />

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -42,7 +43,10 @@ export default function RootLayout({
         <meta property="og:title" content="Spot Finder" />
         <meta property="og:image" content="/logo.jpeg" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }
