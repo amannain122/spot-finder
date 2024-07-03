@@ -5,7 +5,7 @@ import yt_dlp
 import pandas as pd
 
 # Load the YOLO model
-model = YOLO('yolov8x.pt')
+model = YOLO('yolov8n.pt')
 
 video_url = 'https://www.youtube.com/watch?v=HBDD3j5so0g'
 
