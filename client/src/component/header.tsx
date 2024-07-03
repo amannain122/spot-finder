@@ -53,17 +53,25 @@ export function NavigationMenuDemo() {
                       Spot Finder
                     </div>
                     <p className="text-sm leading-tight text-muted-foreground">
-                      AI and DS Step Group Project
+                      AI and DS Step Group Project/Parking Spot Finder
                     </p>
                   </a>
                 </NavigationMenuLink>
               </li>
-              <ListItem href="/" title="App">
-                Parking Space Finder
-              </ListItem>
               <ListItem href="/about" title="About">
                 About The Project, Teams Members
               </ListItem>
+
+              <ListItem
+                href="/login"
+                title="Login"
+                className="lg:hidden md:hidden sm:block"
+              ></ListItem>
+              <ListItem
+                href="/register"
+                title="Register"
+                className="lg:hidden md:hidden sm:block"
+              ></ListItem>
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
@@ -151,9 +159,9 @@ export const Header = () => {
             </MenubarMenu>
           </Menubar>
         ) : (
-          <>
+          <div className="hidden lg:block md:block">
             <Link href="/login">
-              <button className="bg-gray-100 text-black py-2 px-4 rounded-sm">
+              <button className="bg-gray-100 text-black py-2 px-4 mr-2 rounded-sm">
                 Login
               </button>
             </Link>
@@ -163,7 +171,7 @@ export const Header = () => {
                 Register
               </button>
             </Link>
-          </>
+          </div>
         )}
 
         <a href="https://github.com/amannain122/spot-finder" target="_blank">
