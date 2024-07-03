@@ -10,5 +10,5 @@ urlpatterns = [
     path('', PostList.as_view(), name='post_list'),
     path('list_redshift_tables/', list_redshift_tables,
          name='list_redshift_tables'),
-    path('api/parking-status/', ParkingStatusView.as_view(), name='parking_status'),
+    path('parking-status/', ParkingStatusView.as_view(), name='parking_status'),
 ]
