@@ -178,4 +178,29 @@ export const handleError = (err: any, showToast = true) => {
   }
 };
 
-export { login, register, updateUser, setJwtToken, getJwtToken, getUser };
+const getParkingSpot = async () => {
+  const api = `${BASE_URL}/api/parking-status/`;
+
+  try {
+    const response = await getData(api);
+    return {
+      status: "success",
+      data: response.data,
+    };
+  } catch (error) {
+    return {
+      status: "failure",
+      data: error,
+    };
+  }
+};
+
+export {
+  login,
+  register,
+  updateUser,
+  setJwtToken,
+  getJwtToken,
+  getUser,
+  getParkingSpot,
+};
