@@ -18,4 +18,6 @@ python manage.py runserver
 
 ```bash
 python manage.py createsuperuser
+docker-compose up --build -d
+
 ```
