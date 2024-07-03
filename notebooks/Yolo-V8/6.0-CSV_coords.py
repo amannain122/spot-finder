@@ -3,6 +3,8 @@ import numpy as np
 from ultralytics import YOLO
 import yt_dlp
 import pandas as pd
+import csv
+from datetime import datetime
 
 # Load the YOLO model
 model = YOLO('yolov8n.pt')
@@ -10,6 +12,8 @@ model = YOLO('yolov8n.pt')
 video_url = 'https://www.youtube.com/watch?v=HBDD3j5so0g'
 
 csv_path = 'rois.csv'
+output_csv_path = 'parking_status.csv'
+
 data = pd.read_csv(csv_path)
 
 # Extract bounding box coordinates
@@ -41,6 +45,14 @@ except Exception as e:
 bounding_boxes_status = [False] * len(bounding_box_areas)
 prev_empty_boxes = len(bounding_box_areas)
 
+# Check if the output CSV file already exists
+file_exists = False
+try:
+    with open(output_csv_path, 'r') as csv_file:
+        file_exists = True
+except FileNotFoundError:
+    pass
+
 # Loop through the video frames
 while True:
     ret, frame = cap.read()
@@ -52,6 +64,9 @@ while True:
     detections = results[0].boxes.data
 
     class_names = model.names
+
+    # Reset bounding boxes status for this frame
+    bounding_boxes_status = [False] * len(bounding_box_areas)
 
     # Iterate through detections and check if 'car' or 'truck' is within any of the specified bounding box areas
     for detection in detections:
@@ -80,7 +95,7 @@ while True:
     for i, area in enumerate(bounding_box_areas):
         cv2.polylines(frame, [np.array(area, np.int32)], True, (0, 255, 255), 2)
         area_center = np.mean(area, axis=0).astype(int)
-        cv2.putText(frame, f'SP{i+1}', tuple(area_center), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        cv2.putText(frame, f'SP{i + 1}', tuple(area_center), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
     empty_boxes = bounding_boxes_status.count(False)
 
@@ -89,13 +104,24 @@ while True:
         print(f"Number of empty lots: {empty_boxes}")
         print(f"Number of occupied lots: {len(bounding_box_areas) - empty_boxes}")
         for i, status in enumerate(bounding_boxes_status):
-            print(f"SP{i+1} is {'occupied' if status else 'empty'}")
+            print(f"SP{i + 1} is {'occupied' if status else 'empty'}")
+
+        # Write the data to the CSV file
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        row = [timestamp] + bounding_boxes_status
+        with open(output_csv_path, mode='a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            if not file_exists:
+                csv_writer.writerow(['Timestamp'] + [f'SP{i + 1}' for i in range(len(bounding_box_areas))])
+                file_exists = True
+            csv_writer.writerow(row)
+
         prev_empty_boxes = empty_boxes
 
-    # Display the frame
-    #cv2.imshow('Result', frame)
-    #if cv2.waitKey(1) & 0xFF == ord('q'):
-    #    break
+    # Display the frame (commented out for non-interactive environments)
+    # cv2.imshow('Result', frame)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     break
 
 # Release video capture
 cap.release()
