@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { MapDetail } from "./map-detail";
 
@@ -32,41 +33,42 @@ const parkingLots = [
 const ParkingDetail = () => {
   const searchParams = useSearchParams();
   const search = searchParams.get("id");
-  const parkingDtl: any = parkingLots.find((data: any) => data.id === search);
+  const parkingDtl: any = parkingLots?.find((data: any) => data?.id === search);
 
-  console.log(search, parkingDtl)
+  console.log(search, parkingDtl);
   return (
-    <div>
-      <div className="flex flex-row items-center justify-between w-full px-4 gap-8 mt-8">
-        {/* Add the Discover Affordable Parking Effortlessly with Spot Finder */}
-        <div className=" p-4">
-          <h2 className="text-lg font-semibold mb-2">{parkingDtl.address}</h2>
-          <div className="flex justify-between items-center mb-2">
-            <span>Availability - {parkingDtl.availability}</span>
+    <Suspense fallback={<div>Loading...</div>}>
+      <div>
+        <div className="flex flex-row items-center justify-between w-full px-4 gap-8 mt-8">
+          {/* Add the Discover Affordable Parking Effortlessly with Spot Finder */}
+          <div className=" p-4">
+            <h2 className="text-lg font-semibold mb-2">{parkingDtl.address}</h2>
+            <div className="flex justify-between items-center mb-2">
+              <span>Availability - {parkingDtl.availability}</span>
+            </div>
+            <div className="mb-4">
+              Rating: <span>{parkingDtl.rating.toFixed(1)}</span>
+            </div>
+
+            <br />
+            <button className="bg-white text-gray-700 py-2 px-4 rounded border shadow-lg border-gray-300">
+              Confirm Selection
+            </button>
           </div>
-          <div className="mb-4">
-            Rating: <span>{parkingDtl.rating.toFixed(1)}</span>
 
+          {/* Add the Ground Floor text */}
+
+          <div className="">
+            <img
+              src={parkingDtl.image}
+              alt="Parking Lot"
+              className=" w-full h-full object-cover rounded-lg border-2"
+            />
           </div>
-         
-          <br />
-          <button className="bg-white text-gray-700 py-2 px-4 rounded border shadow-lg border-gray-300">
-            Confirm Selection
-          </button>
         </div>
-
-        {/* Add the Ground Floor text */}
-
-        <div className="">
-          <img
-            src={parkingDtl.image}
-            alt="Parking Lot"
-            className=" w-full h-full object-cover rounded-lg border-2"
-          />
-        </div>
+        <MapDetail />
       </div>
-      <MapDetail />
-    </div>
+    </Suspense>
   );
 };
 
