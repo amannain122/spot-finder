@@ -1,8 +1,8 @@
+import { ParkingList } from "@/component/parking-card";
+import { MapDrawer } from "@/component/drawer";
 import { SearchBox } from "@/component/search";
 import { MapComponent } from "../component";
-import { ParkingList } from "@/component/parking-card";
 import { Header } from "@/component/header";
-import { MapDrawer } from "@/component/drawer";
 
 const Home = () => {
   return (

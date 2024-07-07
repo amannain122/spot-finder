@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Metadata } from "next";
-
 import { LoginForm } from "@/component/form";
 
 export const metadata: Metadata = {

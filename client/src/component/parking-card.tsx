@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { getParkingSpot } from "@/lib/server";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getParkingSpot } from "@/lib/server";
 
 const ParkingLotCard = ({
   image,

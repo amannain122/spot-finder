@@ -1,7 +1,7 @@
 import { Metadata } from "next";
+import { ParkingDetail } from "@/component/parking-details";
 import { Separator } from "@/components/ui/separator";
 import { Header } from "@/component/header";
-import { ParkingDetail } from "@/component/parking-details";
 
 export const metadata: Metadata = {
   title: "Select-parking | Spot Finder",

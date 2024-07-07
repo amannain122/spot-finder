@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
+import { handleError, login, register, setJwtToken } from "@/lib/server";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { handleError, login, register, setJwtToken } from "@/lib/server";
 
 export const LoginForm = () => {
   const { toast } = useToast();

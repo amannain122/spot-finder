@@ -1,8 +1,5 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { RegisterForm } from "@/component/form";
 
 export const metadata: Metadata = {

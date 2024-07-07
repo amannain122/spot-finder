@@ -6,8 +6,7 @@ import Map, {
   GeolocateControl,
 } from "react-map-gl";
 
-const TOKEN =
-  "pk.eyJ1IjoicHJha2FzaHB1bjIyIiwiYSI6ImNsdzUzd3J5cjFoaTQya242YTgzcXlvZncifQ.frgsDUb2l3D8ZolT50Ab1w"; // Set your mapbox token here
+const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN; // Set your mapbox token here
 
 export const MapDetail = () => {
   return (

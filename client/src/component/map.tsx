@@ -10,11 +10,9 @@ import Map, {
 } from "react-map-gl";
 import axios from "axios";
 import Pin from "../atoms/pins";
-
 import CITIES from "../data/mock-data.json";
 
-const TOKEN =
-  "pk.eyJ1IjoicHJha2FzaHB1bjIyIiwiYSI6ImNsdzUzd3J5cjFoaTQya242YTgzcXlvZncifQ.frgsDUb2l3D8ZolT50Ab1w"; // Set your mapbox token here
+const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 export const MapComponent = () => {
   const [popupInfo, setPopupInfo] = useState<any>(null);
