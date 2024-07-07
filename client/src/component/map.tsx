@@ -12,7 +12,7 @@ import axios from "axios";
 import Pin from "../atoms/pins";
 import CITIES from "../data/mock-data.json";
 
-const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN; // mapbox api token
 
 export const MapComponent = () => {
   const [popupInfo, setPopupInfo] = useState<any>(null);

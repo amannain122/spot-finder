@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 
+// backend server url
 export const BASE_URL = "http://localhost:8000";
 
 const axiosInstance = axios.create({

@@ -75,6 +75,7 @@ export const ParkingList = () => {
   const [parkingSpot, setParkingSpot] = useState<any>({});
 
   useEffect(() => {
+    // get parking spot detail from the backend
     const getSpot = async () => {
       const response = await getParkingSpot();
       if (response.status === "success") {
