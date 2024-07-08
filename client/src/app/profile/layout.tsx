@@ -1,9 +1,8 @@
 import { Metadata } from "next";
 import Image from "next/image";
-
 import { Separator } from "@/components/ui/separator";
-import { SidebarNav } from "./nav";
 import { Header } from "@/component/header";
+import { SidebarNav } from "./nav";
 
 export const metadata: Metadata = {
   title: "Profile | Spot Finder",

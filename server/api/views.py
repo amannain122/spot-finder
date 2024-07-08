@@ -1,3 +1,5 @@
+import os
+import pandas as pd
 from rest_framework import generics
 from api.models import Post
 from rest_framework.response import Response
@@ -8,13 +10,13 @@ from django.middleware.csrf import get_token
 from rest_framework import status
 from rest_framework import serializers
 from rest_framework import permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer
-
+from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingStatusSerializer
+from django.http import JsonResponse
+from django.db import connection
 from .models import User
+from django.http import JsonResponse
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):
@@ -96,3 +98,53 @@ class PostList(generics.ListCreateAPIView):
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     pass
+
+
+def list_redshift_tables(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT table_schema, table_name
+            FROM information_schema.tables
+            WHERE table_type = 'BASE TABLE'
+              AND table_schema NOT IN ('information_schema', 'pg_catalog')
+        """)
+        rows = cursor.fetchall()
+        columns = [col[0] for col in cursor.description]
+        data = [dict(zip(columns, row)) for row in rows]
+    return JsonResponse(data, safe=False)
+
+
+class ParkingStatusView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        file_path = os.path.join(
+            settings.BASE_DIR, 'data/parking_status.csv')
+        parking_data = pd.read_csv(file_path)
+
+        # Get the latest data (assuming the CSV is sorted by Timestamp)
+        latest_data = parking_data.iloc[-1]
+
+        total_spots = len(latest_data) - 1
+        available_spots = (latest_data == 'empty').sum()
+        reserved_spots = (latest_data == 'occupied').sum()
+
+        # Prepare the spots data
+        spots = [
+            {'spot': spot, 'status': latest_data[spot]}
+            for spot in latest_data.index if spot != 'Timestamp'
+        ]
+
+        # Prepare the response data
+        response_data = {
+            "id": 1,
+            'coordinates': {"latitude": 43.7760345, "longitude": -79.2601504},
+            'total_spots': total_spots,
+            'available_spots': available_spots,
+            'reserved_spots': reserved_spots,
+            'spots': spots,
+        }
+
+        serializer = ParkingStatusSerializer(response_data)
+
+        return Response(serializer.data)
