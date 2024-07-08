@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Parking Spot Finder Frontend
+
+## Overview
+
+The `parking spot finder` is a web appliation designed to help users locate available parking spots in real-time. This documentation will guide developers on how to set up, run and contribute to the project.
+
+## Tech Stack
+
+- `React` (Typescript): A popular Javascript library for building user interfaces.
+- `Next.js` (A react framework for server-side rendering and generating static websites.)
+- `node.js` (version 18+ required JavaScript runtime for server-side development [node.js](https://nodejs.org/en))
+- `yarn/npm` (Package manager to handle dependencies)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+Ensure you have the following installed on your development environment:
+
+- Node.js (version 18 or above)
+- `yarn` or `npm` package manager
+
+### Installation
+
+Clone the repository and install the dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+> git clone https://github.com/amainnain122/spot-finder.git
+> cd spot-finder
+> cd client # where the fontend project is located
+> yarn install # install packages
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Running the Application Locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Start the local development server
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+> yarn dev # run the app
+```
 
-## Learn More
+## Running the Application via Docker
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+> bash run.sh # or
+> docker build -t spot-finder-app:1.0 . # buld app
+> docker image ls # list images
+> docker run -d -p 3001:3001 --name spot-finder spot-finder-app:1.0
+> docker image prune -a --filter "until=24h" -f # clear images
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Folder Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```bash
+├── public
+├── src
+   ├── app <- All the pages and app config
+   ├── assets <- Images, Fonts used in the project
+   ├── atoms <- reusable UI
+   ├── compponent <- Reusable components
+   ├── components <- Reusable components from shadcn UI
+   ├── data <- mock or dummy data
+   ├── lib <- Contains helper function and API connections
+├── index.html <- Entry Point
+├── README.md <- Developer Documentation
+├── package.json <- list of library used
 
-## Deploy on Vercel
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The project is deployed on vercel. You can access the web application here [Web App Link](https://spot-find.vercel.app)
