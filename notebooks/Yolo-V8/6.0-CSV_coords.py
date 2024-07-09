@@ -7,7 +7,7 @@ import csv
 from datetime import datetime
 
 # Load the YOLO model
-model = YOLO('yolov8n.pt')
+model = YOLO('yolov8s.pt')
 
 video_url = 'https://www.youtube.com/watch?v=HBDD3j5so0g'
 
@@ -108,20 +108,28 @@ while True:
 
         # Write the data to the CSV file
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        row = [timestamp] + bounding_boxes_status
-        with open(output_csv_path, mode='a', newline='') as csv_file:
-            csv_writer = csv.writer(csv_file)
-            if not file_exists:
-                csv_writer.writerow(['Timestamp'] + [f'SP{i + 1}' for i in range(len(bounding_box_areas))])
-                file_exists = True
-            csv_writer.writerow(row)
+        row = ['PL01', timestamp] + bounding_boxes_status
+
+        # Read existing data
+        if file_exists:
+            df = pd.read_csv(output_csv_path)
+            # Update the existing row with the new data
+            df.iloc[-1] = row
+        else:
+            # Create a new DataFrame if the file doesn't exist
+            df = pd.DataFrame(columns=['ParkingLotID', 'Timestamp'] + [f'SP{i + 1}' for i in range(len(bounding_box_areas))])
+            df.loc[0] = row
+            file_exists = True
+
+        # Write the DataFrame back to the CSV file
+        df.to_csv(output_csv_path, index=False)
 
         prev_empty_boxes = empty_boxes
 
     # Display the frame (commented out for non-interactive environments)
     # cv2.imshow('Result', frame)
     # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #     break
+    #    break
 
 # Release video capture
 cap.release()
