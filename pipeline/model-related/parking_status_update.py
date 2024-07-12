@@ -1,9 +1,8 @@
-import os
 import pandas as pd
 
 # Load the CSV file
-file_path = 'D:/spot-finder/data/parking_status.csv'
-parking_data = pd.read_csv(file_path)
+parking_status_path = 'D:\spot-finder\data\parking_status.csv'
+parking_data = pd.read_csv(parking_status_path)
 
 # Function to calculate fare based on duration
 def calculate_fare(duration_hours):
@@ -25,7 +24,7 @@ for spot in ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'SP6', 'SP7']:
     for index, row in parking_data.iterrows():
         if row[spot] == 'occupied' and in_time is None:
             in_time = pd.to_datetime(row['Timestamp'])
-        elif row[spot] == 'empty' and in_time is not None:
+        elif row[spot] in ['available', 'empty'] and in_time is not None:
             out_time = pd.to_datetime(row['Timestamp'])
             duration = (out_time - in_time).total_seconds() / 3600  # Duration in hours
             fare = calculate_fare(duration)
@@ -33,23 +32,12 @@ for spot in ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'SP6', 'SP7']:
             in_time = None
             customer_id += 1  # Increment CustomerID for the next customer
 
-            # Update the parking status to 'available'
-            parking_data.at[index, spot] = 'available'
-
 # Convert results to a DataFrame
 results_df = pd.DataFrame(results, columns=['ParkingSpotID', 'CustomerID', 'InTime', 'OutTime', 'DurationHours', 'Fare'])
 
-# Ensure the output directory exists
-output_directory = 'D:/spot-finder/data'
-os.makedirs(output_directory, exist_ok=True)
-
 # Save the results to a new CSV file
-output_file_path = os.path.join(output_directory, 'parking_fares.csv')
-results_df.to_csv(output_file_path, index=False)
+results_file_path = 'D:\spot-finder\data\parking_fares_calculated.csv'
+results_df.to_csv(results_file_path, index=False)
 
-# Save the updated original CSV file
-updated_file_path = 'D:/spot-finder/data/parking_status.csv'
-parking_data.to_csv(updated_file_path, index=False)
-
+# Display the first few rows of the results
 print(results_df.head())
-print(parking_data.head())
