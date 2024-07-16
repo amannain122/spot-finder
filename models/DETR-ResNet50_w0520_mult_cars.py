@@ -216,9 +216,6 @@ class Detr(pl.LightningModule):
         return val_dataloader
 
 
-# # Start tensorboard.
-# %load_ext tensorboard
-# %tensorboard --logdir lightning_logs/
 
 # In[222]:
 
@@ -374,7 +371,7 @@ def plot_results(pil_img, prob, boxes):
 
 import torchvision.ops as ops
 
-def visualize_predictions(image, outputs, threshold=0.9, keep_highest_scoring_bbox=False, iou_threshold=0.5):
+def visualize_predictions(image, outputs, threshold=0.9, keep_highest_scoring_bbox=False, iou_threshold=0.5):  #iou low = less boxes
   # keep only predictions with confidence >= threshold
   probas = outputs.logits.softmax(-1)[0, :, :-1]
 
@@ -408,10 +405,11 @@ def visualize_predictions(image, outputs, threshold=0.9, keep_highest_scoring_bb
 
   boxes_scaled = boxes_scaled[keep].cpu()
   class_idx = [class_idx[i] for i in keep]
-  print(f"Number of probabilities: {len(probas[keep])}")
-  print(f"Number of bounding boxes: {len(boxes_scaled)}")
-  print(f"Image size: {image.size}")
-  print(f"boxes_scaled: {boxes_scaled}")
+  # print(f"Number of probabilities: {len(probas[keep])}")
+  # print(probas[keep])
+  # print(f"Number of bounding boxes: {len(boxes_scaled)}")
+  # print(f"Image size: {image.size}")
+  # print(f"boxes_scaled: {boxes_scaled}")
 
   from PIL import ImageDraw
   draw = ImageDraw.Draw(image)
@@ -420,15 +418,8 @@ def visualize_predictions(image, outputs, threshold=0.9, keep_highest_scoring_bb
       draw.rectangle(bbox.tolist(), outline='red', width=3)
       draw.text((bbox[0], bbox[1]), id2label[label], fill='white')
     
-  image.show()
+  # image.show()
 
-'''
-  draw.rectangle(boxes_scaled.squeeze().tolist(), outline='red', width=3)
-  draw.text((boxes_scaled.squeeze().tolist()[0], boxes_scaled.squeeze().tolist()[1]), id2label[class_idx], fill='white')
-  image.show()
-  # plot results
-  #plot_results(image, probas[keep], boxes_scaled)
-'''
 
 
 # In[234]:
@@ -545,8 +536,157 @@ for pixel_values, img_file in test_dataloader:
     except Exception as e:
         print(f"Error in visualization for image {image_id}: {e}")
 
+import cv2
+import numpy as np
+import torch
+from PIL import Image
+from transformers import DetrImageProcessor
+import yt_dlp
+import threading
+import queue
+import cProfile
+import pstats
+import io
+from pstats import SortKey
+import signal
+import sys
+import torchvision.ops as ops
 
-# In[ ]:
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+profiler = cProfile.Profile()
+
+
+def profile_function(func):
+    """A simple decorator for profiling a function."""
+
+    def wrapper(*args, **kwargs):
+        profiler.enable()
+        result = func(*args, **kwargs)
+        profiler.disable()
+        s = io.StringIO()
+        sortby = SortKey.CUMULATIVE
+        ps = pstats.Stats(profiler, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        with open("profiling_results.txt", "w") as f:
+            f.write(s.getvalue())
+        print(s.getvalue())
+        return result
+
+    return wrapper
+
+
+def signal_handler(sig, frame):
+    profiler.disable()
+    s = io.StringIO()
+    sortby = SortKey.CUMULATIVE
+    ps = pstats.Stats(profiler, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    with open("profiling_results.txt", "w") as f:
+        f.write(s.getvalue())
+    print(s.getvalue())
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, signal_handler)
+
+
+def process_frame(frame_queue, model, feature_extractor, processed_frame_queue):
+    while True:
+        frame = frame_queue.get()
+        if frame is None:
+            break
+
+        # Convert frame to PIL image
+        img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+        # Transform the image
+        encoding = feature_extractor(images=img, return_tensors="pt")
+        pixel_values = encoding["pixel_values"].squeeze(0).to(device)
+
+        # Perform detection
+        with torch.no_grad():
+            outputs = model(pixel_values=pixel_values.unsqueeze(0), pixel_mask=None)
+
+        # Visualize the results
+        visualize_predictions(img, outputs, threshold=0.08, keep_highest_scoring_bbox=False, iou_threshold=0.5)
+
+        # Convert PIL image back to frame
+        processed_frame = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+
+        processed_frame_queue.put(processed_frame)
+
+
+@profile_function
+def process_youtube_video(video_url, model, resolution='best[height<=480]', frame_skip=5, num_threads=10):
+    ydl_opts = {
+        'format': resolution,  # Adjust to desired resolution
+        'quiet': True,
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(video_url, download=False)
+        video_url = info_dict['url']
+        print("Video URL:", video_url)  # Debug: Print the video URL
+
+    cap = cv2.VideoCapture(video_url)
+    if not cap.isOpened():
+        print("Error: Unable to open video stream.")
+        return
+
+    feature_extractor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50")
+    frame_queue = queue.Queue(maxsize=10)
+    processed_frame_queue = queue.Queue(maxsize=10)
+
+    # Create multiple processing threads
+    threads = []
+    for _ in range(num_threads):
+        t = threading.Thread(target=process_frame, args=(frame_queue, model, feature_extractor, processed_frame_queue))
+        t.start()
+        threads.append(t)
+
+    frame_count = 0
+    stop_flag = False
+
+    while cap.isOpened() and not stop_flag:
+        ret, frame = cap.read()
+        if not ret:
+            print("Error: Frame not read properly.")
+            break
+
+        frame_count += 1
+        if frame_count % frame_skip != 0:
+            continue
+
+        if frame_queue.full():
+            continue
+
+        frame_queue.put(frame)
+
+        if not processed_frame_queue.empty():
+            processed_frame = processed_frame_queue.get()
+            cv2.imshow('Live Stream', processed_frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            stop_flag = True
+            break
+
+    for _ in range(num_threads):
+        frame_queue.put(None)
+
+    for t in threads:
+        t.join()
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+# URL of the YouTube live video
+youtube_url = 'https://www.youtube.com/watch?v=QH0z-Dx6s7c'
+
+# Assuming 'model' is already defined and loaded
+process_youtube_video(youtube_url, model, resolution='best[height<=480]', frame_skip=5, num_threads=10)
+
 
 
 

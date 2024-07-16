@@ -7,7 +7,7 @@ export const AboutSection = () => {
             Spot Finder
           </h2>
           <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            A Parking Sport Finder App
+            A Parking Spot Finder App
           </p>
           <p className="mt-6 text-lg leading-8 text-gray-600">
             Spot Finder utilizes object detection to identify and locate

@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getParkingSpot } from "@/lib/server";
 
 const ParkingLotCard = ({
   image,
@@ -11,7 +13,6 @@ const ParkingLotCard = ({
   id,
 }: any) => {
   const router = useRouter();
- 
 
   return (
     <div
@@ -71,8 +72,33 @@ const parkingLots = [
 ];
 
 export const ParkingList = () => {
+  const [parkingSpot, setParkingSpot] = useState<any>({});
+
+  useEffect(() => {
+    // get parking spot detail from the backend
+    const getSpot = async () => {
+      const response = await getParkingSpot();
+      if (response.status === "success") {
+        console.log(response.data);
+        setParkingSpot(response.data);
+      }
+    };
+
+    getSpot();
+  }, []);
+
   return (
-    <div className="min-h-screen p-6">
+    <div className=" p-6">
+      {parkingSpot ? (
+        <ParkingLotCard
+          image={"image3.png"}
+          address={"Stream Test Address"}
+          distance={"20"}
+          availability={parkingSpot?.available_spots || 1}
+          rating={2.2}
+          id={4}
+        />
+      ) : null}
       {parkingLots.map((lot, index) => (
         <ParkingLotCard
           key={index}
@@ -88,4 +114,4 @@ export const ParkingList = () => {
   );
 };
 
-export { ParkingLotCard };
+export { ParkingLotCard };

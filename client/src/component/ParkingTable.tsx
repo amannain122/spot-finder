@@ -1,4 +1,3 @@
-// components/ParkingTable.tsx
 import React from "react";
 
 interface ParkingTableProps {
