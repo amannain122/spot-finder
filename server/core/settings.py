@@ -28,6 +28,18 @@ if os.path.exists(env_file):
     environ.Env.read_env(env_file)
 else:
     print("Warning: .env file not found at", env_file)
+
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_STORAGE_BUCKET_NAME = ''
+AWS_S3_REGION_NAME = ''
+
+# Optional: Set custom domain for static and media files
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+# Tell Django to use S3 storage for static files and media
+DEFAULT_FILE_STORAGE = ''
+STATICFILES_STORAGE = ''
 # Initialize environment variables
 # env = environ.Env()
 
@@ -89,7 +101,7 @@ TEMPLATES = [
 ]
 
 DATABASES = {
-         'default': {
+    'default': {
         'ENGINE': 'django_redshift_backend',
         'NAME': 'dev',
         'USER': 'awsuser',
@@ -97,7 +109,7 @@ DATABASES = {
         'HOST': 'redshift-cluster-1.cqyedsmaziep.us-east-2.redshift.amazonaws.com',
         'PORT': '5439',
     }
-    
+
 }
 # DATABASES = {
 #     'default': {
