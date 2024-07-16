@@ -1,9 +1,12 @@
+// src/app/page.tsx
+import dynamic from 'next/dynamic';
 import { SearchBox } from "@/component/search";
 import { MapComponent } from "../component";
 import { ParkingList } from "@/component/parking-card";
 import { Header } from "@/component/header";
 
 const Home = () => {
+
   return (
     <div className="p-width m-4 relative">
       <Header />
@@ -22,7 +25,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
-
-
