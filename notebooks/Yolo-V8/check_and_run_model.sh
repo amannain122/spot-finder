@@ -6,11 +6,16 @@ PROCESS_NAME="6.0-CSV_coords.py"
 # Define the full path to your script
 SCRIPT_PATH="/home/ubuntu/spot-finder/notebooks/Yolo-V8/6.0-CSV_coords.py"
 
-# Check if the process is running
-if ! pgrep -f "$PROCESS_NAME" > /dev/null
-then
-    echo "$(date): $PROCESS_NAME not running, starting it now..." >> /home/ubuntu/spot-finder/notebooks/Yolo-V8/logs/script_running.log
-    nohup $SCRIPT_PATH &
+LOG_FILE="/home/ubuntu/spot-finder/notebooks/Yolo-V8/logs/script_running.log"
+
+source /home/ubuntu/spot-finder/venv/bin/activate
+
+if ! pgrep -f "$PROCESS_NAME" > /dev/null; then
+       	echo "$(date): $PROCESS_NAME not running, starting it now..." >> "$LOG_FILE"
+	  # Start the script in the background with nohup
+   	 nohup python3 "$SCRIPT_PATH" >> "$LOG_FILE" 2>&1 &
 else
-    echo "$(date): $PROCESS_NAME is already running." >> /home/ubuntu/spot-finder/notebooks/Yolo-V8/logs/script_running.log
+        echo "$(date): $PROCESS_NAME is already running." >> "$LOG_FILE"
 fi
+
+deactivate
