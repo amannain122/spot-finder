@@ -1,10 +1,42 @@
-# Parking Spot Finder Frontend
+# Spot Finder
 
-## Overview
+Our goal is to make parking more accessible, convenient, and sustainable for everyone. Spot Finder aims to solve the problem of underutilized parking lots by providing data-driven solutions. Spot Finder will help individuals and businesses optimize their parking spaces, reducing congestion and increasing efficiency.
 
-The `parking spot finder` is a web appliation designed to help users locate available parking spots in real-time. This documentation will guide developers on how to set up, run and contribute to the project.
+## Project Overview
 
-## Tech Stack
+Spot Finder is a comprehensive solution that integrates computer vision and machine learning to detect empty parking spots and provide real-time updates to users. Our system includes both a server and frontend application to deliver a seamless user experience.
+
+### Key Features
+- **Real-time Parking Detection**: Utilizing advanced computer vision techniques to identify available parking spots.
+- **User-Friendly Dashboard**: Visual representation of parking data for easy understanding and decision-making.
+- **Interactive Mobile App**: Allows users to find and book parking spots quickly and efficiently.
+
+## Visual Demonstrations
+
+### Real-time Parking Detection
+![Real-time Parking Detection](src/images/real_time.png)
+Our system accurately detects empty parking spots and highlights them for easy identification.
+
+### User Dashboard
+![User Dashboard](src/images/dashboard.png)
+The dashboard provides a comprehensive overview of parking data including duration, fare, and parking patterns.
+
+### Mobile App Interface
+![Mobile App Interface](src/images/app_frontend.png)
+- Our mobile app offers a user-friendly interface to find and book parking spots.
+- Users can select available parking spots and confirm their booking through the app.
+
+### Technologies Used
+- Python
+- Flask
+- TensorFlow
+- OpenCV
+- React
+- Redux
+- Material-UI
+- React Native
+
+### Tech Stack
 
 - `React` (Typescript): A popular Javascript library for building user interfaces.
 - `Next.js` (A react framework for server-side rendering and generating static websites.)
