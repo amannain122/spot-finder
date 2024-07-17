@@ -1,3 +1,5 @@
+// src/app/page.tsx
+import dynamic from "next/dynamic";
 import { ParkingList } from "@/component/parking-card";
 import { MapDrawer } from "@/component/drawer";
 import { SearchBox } from "@/component/search";
