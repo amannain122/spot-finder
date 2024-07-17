@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Define the name of the process or script to check
-PROCESS_NAME="6.0-CSV_coords.py"
+PROCESS_NAME="spotfinder-aws.py"
 
 # Define the full path to your script
-SCRIPT_PATH="/home/ubuntu/spot-finder/notebooks/Yolo-V8/6.0-CSV_coords.py"
+SCRIPT_PATH="/home/ubuntu/spot-finder/notebooks/Yolo-V8/spotfinder-aws.py"
 
 LOG_FILE="/home/ubuntu/spot-finder/notebooks/Yolo-V8/logs/script_running.log"
 
