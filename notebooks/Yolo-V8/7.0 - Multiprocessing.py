@@ -9,7 +9,7 @@ from multiprocessing import Process
 # Function to process each parking lot
 def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path):
     # Load the YOLO model
-    model = YOLO('yolov8s.pt')
+    model = YOLO('yolov8n.pt')
 
     # Read the ROI CSV file
     data = pd.read_csv(roi_csv_path)
