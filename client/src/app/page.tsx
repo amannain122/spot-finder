@@ -1,16 +1,12 @@
-<<<<<<< HEAD
 // src/app/page.tsx
-import dynamic from 'next/dynamic';
-=======
+import dynamic from "next/dynamic";
 import { ParkingList } from "@/component/parking-card";
 import { MapDrawer } from "@/component/drawer";
->>>>>>> main
 import { SearchBox } from "@/component/search";
 import { MapComponent } from "../component";
 import { Header } from "@/component/header";
 
 const Home = () => {
-
   return (
     <div className="p-width m-4 relative">
       <Header />
