@@ -15,7 +15,7 @@ from botocore.exceptions import NoCredentialsError
 def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path, s3_bucket_name, role_arn,
                         region_name='us-west-2'):
     # Load the YOLO model
-    model = YOLO('yolov8s.pt')
+    model = YOLO('yolov8n.pt')
 
     # Read the ROI CSV file
     data = pd.read_csv(roi_csv_path)
