@@ -1,7 +1,13 @@
+<<<<<<< HEAD
+ "use client";
+
+=======
 "use client";
 import { Suspense } from "react";
+>>>>>>> main
 import { useSearchParams } from "next/navigation";
 import { MapDetail } from "./map-detail";
+import QRCodeComponent from "@/component/QRCodeComponent"; 
 
 const parkingLots = [
   {
@@ -35,6 +41,11 @@ const ParkingDetail = () => {
   const search = searchParams.get("id");
   const parkingDtl: any = parkingLots?.find((data: any) => data?.id === search);
 
+<<<<<<< HEAD
+  const qrCodeUrl = `http://localhost:3000/parking-detail?id=${search}`;
+
+=======
+>>>>>>> main
   console.log(search, parkingDtl);
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -55,6 +66,25 @@ const ParkingDetail = () => {
               Confirm Selection
             </button>
           </div>
+<<<<<<< HEAD
+          <div className="mb-4">
+            Rating: <span>{parkingDtl.rating.toFixed(1)}</span>
+          </div>
+          <br />
+          <button className="bg-white text-gray-700 py-2 px-4 rounded border shadow-lg border-gray-300">
+            Confirm Selection
+          </button>
+        </div>
+
+        {/* Add the Ground Floor text */}
+        <div className="flex-grow">
+          <img
+            src={parkingDtl.image}
+            alt="Parking Lot"
+            className=" w-full h-full object-cover rounded-lg border-2"
+            style={{ width: "500px", height: "200px" }}
+          />
+=======
 
           {/* Add the Ground Floor text */}
 
@@ -65,10 +95,19 @@ const ParkingDetail = () => {
               className=" w-full h-full object-cover rounded-lg border-2"
             />
           </div>
+>>>>>>> main
         </div>
         <MapDetail />
       </div>
+<<<<<<< HEAD
+      <div style={{ position: 'absolute', top: '20%', right: '18%' }}>
+        <QRCodeComponent url={qrCodeUrl} />
+      </div>
+      <MapDetail />
+    </div>
+=======
     </Suspense>
+>>>>>>> main
   );
 };
 
