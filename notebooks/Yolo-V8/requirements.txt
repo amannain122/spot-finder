@@ -3,3 +3,4 @@ opencv-python==4.9.0.80
 ultralytics==8.2.14
 pafy==0.5.5
 boto3==1.34.144
+python-dotenv==1.0.1
