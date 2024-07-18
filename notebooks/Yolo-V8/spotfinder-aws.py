@@ -57,7 +57,6 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 
     # Loop through the video frames
     while True:
-        print('reachedHere3')
         ret, frame = cap.read()
         if not ret:
             break
@@ -73,7 +72,6 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 
         # Iterate through detections and check if 'car' or 'truck' is within any of the specified bounding box areas
         for detection in detections:
-            print('reachedHere4')
             x1, y1, x2, y2, confidence, class_id = map(int, detection[:6])
             class_name = class_names[class_id]
 
@@ -98,7 +96,6 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 
         # Draw all bounding box areas
         for i, area in enumerate(bounding_box_areas):
-            print('reachedHere6')
             cv2.polylines(frame, [np.array(area, np.int32)], True, (0, 255, 255), 2)
             area_center = np.mean(area, axis=0).astype(int)
             cv2.putText(frame, f'SP{i + 1}', tuple(area_center), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
