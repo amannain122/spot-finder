@@ -34,6 +34,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
         ]
         bounding_box_areas.append(coords)
 
+    print("reeached 0")
     # Set up video streaming
     ydl_opts = {
         'format': 'best[height=720]',
