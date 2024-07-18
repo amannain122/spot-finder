@@ -34,7 +34,6 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
         ]
         bounding_box_areas.append(coords)
 
-    print("reeached 0")
     # Set up video streaming
     ydl_opts = {
         'format': 'best[height=720]',
@@ -157,7 +156,6 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
         # cv2.imshow('Result', frame)
         # if cv2.waitKey(1) & 0xFF == ord('q'):
         #    break
-        print('reachedHere8')
 
     # Release video capture
     cap.release()
@@ -170,7 +168,6 @@ def main():
     output_csv_path = 'SampleAthena/parking_status/parking_status.csv'
     s3_bucket_name = 'spotfinder-data-bucket'
     role_arn = 'arn:aws:s3:::spotfinder-data-bucket/SampleAthena/parking_status/'
-    print('reachedHere9')
 
 
     # Read the parking lots CSV
@@ -182,7 +179,6 @@ def main():
         parking_lot_id = lot['ParkingLotID']
         video_url = lot['URL']
         roi_csv_path = lot['ROI']
-        print('reachedHere10')
 
         p = Process(target=process_parking_lot,
                     args=(parking_lot_id, video_url, roi_csv_path, output_csv_path, s3_bucket_name, role_arn))
