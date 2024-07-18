@@ -9,13 +9,16 @@ from datetime import datetime
 from multiprocessing import Process
 import boto3
 from botocore.exceptions import NoCredentialsError
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # Function to process each parking lot
 def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path, s3_bucket_name, role_arn,
                         region_name='us-west-2'):
     # Load the YOLO model
-    model = YOLO('/home/ubuntu/spot-finder/notebooks/Yolo-V8/yolov8n.pt')
+    model = YOLO('yolov8n.pt')
 
     # Read the ROI CSV file
     data = pd.read_csv(roi_csv_path)
@@ -159,7 +162,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 
 # Main function to read the parking_lots.csv and start processes
 def main():
-    parking_lots_csv_path = '/home/ubuntu/spot-finder/notebooks/Yolo-V8/parking_lots.csv'
+    parking_lots_csv_path = 'parking_lots.csv'
     output_csv_path = 'SampleAthena/parking_status/parking_status.csv'
     s3_bucket_name = 'spotfinder-data-bucket'
     role_arn = 'arn:aws:s3:::spotfinder-data-bucket/SampleAthena/parking_status/'
