@@ -44,6 +44,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
             info_dict = ydl.extract_info(video_url, download=False)
             video_url = info_dict['url']
         cap = cv2.VideoCapture(video_url)
+        print('reachedHere1')
     except Exception as e:
         print(f"Error loading video for {parking_lot_id}: {e}")
         return
@@ -51,9 +52,11 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
     # Initialize list to track if bounding boxes are empty or not
     bounding_boxes_status = [False] * len(bounding_box_areas)
     prev_empty_boxes = len(bounding_box_areas)
+    print('reachedHere2')
 
     # Loop through the video frames
     while True:
+        print('reachedHere3')
         ret, frame = cap.read()
         if not ret:
             break
@@ -69,6 +72,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 
         # Iterate through detections and check if 'car' or 'truck' is within any of the specified bounding box areas
         for detection in detections:
+            print('reachedHere4')
             x1, y1, x2, y2, confidence, class_id = map(int, detection[:6])
             class_name = class_names[class_id]
 
@@ -89,9 +93,11 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
                         break
                 else:
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    print('reachedHere5')
 
         # Draw all bounding box areas
         for i, area in enumerate(bounding_box_areas):
+            print('reachedHere6')
             cv2.polylines(frame, [np.array(area, np.int32)], True, (0, 255, 255), 2)
             area_center = np.mean(area, axis=0).astype(int)
             cv2.putText(frame, f'SP{i + 1}', tuple(area_center), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
@@ -131,6 +137,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 
             # Write the DataFrame back to the CSV file
             df.to_csv(output_csv_path, index=False)
+            print('reachedHere6')
 
             # Upload to S3
             try:
@@ -142,6 +149,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
                 )
 
                 s3_client.upload_file(output_csv_path, s3_bucket_name, output_csv_path)
+                print('reachedHere7')
                 print(f"File uploaded to S3 bucket {s3_bucket_name} successfully.")
             except NoCredentialsError:
                 print("Credentials not available for uploading to S3.")
@@ -154,6 +162,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
         # cv2.imshow('Result', frame)
         # if cv2.waitKey(1) & 0xFF == ord('q'):
         #    break
+        print('reachedHere8')
 
     # Release video capture
     cap.release()
@@ -166,6 +175,7 @@ def main():
     output_csv_path = 'SampleAthena/parking_status/parking_status.csv'
     s3_bucket_name = 'spotfinder-data-bucket'
     role_arn = 'arn:aws:s3:::spotfinder-data-bucket/SampleAthena/parking_status/'
+    print('reachedHere9')
 
 
     # Read the parking lots CSV
@@ -177,6 +187,7 @@ def main():
         parking_lot_id = lot['ParkingLotID']
         video_url = lot['URL']
         roi_csv_path = lot['ROI']
+        print('reachedHere10')
 
         p = Process(target=process_parking_lot,
                     args=(parking_lot_id, video_url, roi_csv_path, output_csv_path, s3_bucket_name, role_arn))
