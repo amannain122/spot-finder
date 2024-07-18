@@ -45,7 +45,6 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
             info_dict = ydl.extract_info(video_url, download=False)
             video_url = info_dict['url']
         cap = cv2.VideoCapture(video_url)
-        print('reachedHere1')
     except Exception as e:
         print(f"Error loading video for {parking_lot_id}: {e}")
         return
@@ -53,7 +52,6 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
     # Initialize list to track if bounding boxes are empty or not
     bounding_boxes_status = [False] * len(bounding_box_areas)
     prev_empty_boxes = len(bounding_box_areas)
-    print('reachedHere2')
 
     # Loop through the video frames
     while True:
@@ -92,7 +90,6 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
                         break
                 else:
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                    print('reachedHere5')
 
         # Draw all bounding box areas
         for i, area in enumerate(bounding_box_areas):
@@ -135,7 +132,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 
             # Write the DataFrame back to the CSV file
             df.to_csv(output_csv_path, index=False)
-            print('reachedHere6')
+            print('toS3')
 
             # Upload to S3
             try:
