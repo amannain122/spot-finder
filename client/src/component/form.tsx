@@ -58,6 +58,8 @@ export const LoginForm = () => {
           />
         </div>
         <Button
+          aria-label="Login"
+          aria-live="polite"
           className="w-full"
           type="submit"
           disabled={loading}
@@ -160,6 +162,8 @@ export const RegisterForm = () => {
         </div>
         <Button
           className="w-full"
+          aria-label="Create an account"
+          aria-live="polite"
           type="submit"
           disabled={loading}
           onClick={(e) => handleRegister(e)}

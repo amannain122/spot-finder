@@ -31,7 +31,9 @@ export const MapDrawer = () => {
           </div>
           <DrawerFooter>
             <DrawerClose>
-              <Button variant="outline">Close</Button>
+              <Button aria-label="Close" aria-live="polite" variant="outline">
+                Close
+              </Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>

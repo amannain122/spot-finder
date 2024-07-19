@@ -89,7 +89,13 @@ export function ProfileForm() {
         <Label htmlFor="email">Email</Label>
         <Input disabled type="email" id="email" required value={data.email} />
       </div>
-      <Button type="submit" onClick={(e) => handleUpdate(e)} disabled={loading}>
+      <Button
+        aria-label="Update profile"
+        aria-live="polite"
+        type="submit"
+        onClick={(e) => handleUpdate(e)}
+        disabled={loading}
+      >
         {loading ? "Updating..." : "Update Profile"}
       </Button>
     </form>
