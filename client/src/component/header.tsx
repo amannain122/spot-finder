@@ -159,13 +159,21 @@ export const Header = () => {
         ) : (
           <div className="hidden lg:block md:block">
             <Link href="/login">
-              <button className="bg-gray-100 text-black py-2 px-4 mr-2 rounded-sm">
+              <button
+                aria-label="Login"
+                aria-live="polite"
+                className="bg-gray-100 text-black py-2 px-4 mr-2 rounded-sm"
+              >
                 Login
               </button>
             </Link>
 
             <Link className="" href="/register">
-              <button className="bg-green-300 text-black py-2 px-4 rounded-sm">
+              <button
+                aria-label="Register"
+                aria-live="polite"
+                className="bg-green-300 text-black py-2 px-4 rounded-sm"
+              >
                 Register
               </button>
             </Link>
