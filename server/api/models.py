@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, User
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.db import models
@@ -103,3 +103,15 @@ class Post(models.Model):
 
     def __str__(self):
         return f'{self.pk}'
+
+
+class Bookings(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    parking_id = models.FloatField()
+    parking_spot_no = models.FloatField()
+    date = models.DateField()
+    time = models.TimeField()
+    parking_charge = models.FloatField()
+
+    def __str__(self):
+        return f"Booking by {self.user.username} for parking spot {self.parking_spot_no}"

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import CustomUser, User, Post
+from .models import CustomUser, User, Post, Bookings
 
 
 class MyTokenObtaionPairSerializer(TokenObtainPairSerializer):
@@ -76,3 +76,14 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id', 'coordinates', 'availability', 'capacity',
                   'available_space', 'price', 'time_restrictions')
+
+
+class QRCodeSerializer(serializers.Serializer):
+    data = serializers.CharField(max_length=200)
+
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookings
+        fields = ['parking_id', 'parking_spot_no',]

@@ -5,16 +5,21 @@ from rest_framework.views import APIView
 from .serializers import UserSerializer, PostSerializer
 from django.conf import settings
 from django.middleware.csrf import get_token
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework import serializers
 from rest_framework import permissions
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer
-
-from .models import User
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, QRCodeSerializer, BookingSerializer
+from .models import User, Bookings
+from io import BytesIO
+import qrcode
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):
@@ -96,3 +101,40 @@ class PostList(generics.ListCreateAPIView):
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     pass
+
+class GenerateQRCodeAPIView(APIView):
+    def post(self, request):
+        serializer = QRCodeSerializer(data=request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data['data']
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(data)
+            qr.make(fit=True)
+
+            img = qr.make_image(fill_color="black", back_color="white")
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            buffer.seek(0)
+
+            response = HttpResponse(buffer, content_type="image/png")
+            response['Content-Disposition'] = 'attachment; filename="qr_code.png"'
+            return response
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def confirm_booking(request):
+    serializer = BookingSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
