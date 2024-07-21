@@ -14,6 +14,7 @@ from pathlib import Path
 import environ
 from datetime import timedelta
 import os
+import boto3
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -117,6 +118,13 @@ DATABASES = {
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+# Initialize boto3 client
+athena_client = boto3.client(
+    'athena',
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_S3_REGION_NAME
+)
 
 
 WSGI_APPLICATION = 'core.wsgi.application'
