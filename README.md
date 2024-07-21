@@ -1,57 +1,72 @@
-Spot Finder
-==============================
+# Parking Spot Finder Frontend
 
-Smart Parking Solution is an innovative project aimed at optimizing parking management by integrating live camera streams from parking lots to detect empty spaces and count available spots.
+## Overview
 
-Project Organization
-------------
+The `parking spot finder` is a web appliation designed to help users locate available parking spots in real-time. This documentation will guide developers on how to set up, run and contribute to the project.
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+## Tech Stack
 
+- `React` (Typescript): A popular Javascript library for building user interfaces.
+- `Next.js` (A react framework for server-side rendering and generating static websites.)
+- `node.js` (version 18+ required JavaScript runtime for server-side development [node.js](https://nodejs.org/en))
+- `yarn/npm` (Package manager to handle dependencies)
 
---------
+## Getting Started
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+### Prerequisites
+
+Ensure you have the following installed on your development environment:
+
+- Node.js (version 18 or above)
+- `yarn` or `npm` package manager
+
+### Installation
+
+Clone the repository and install the dependencies:
+
+```bash
+> git clone https://github.com/amainnain122/spot-finder.git
+> cd spot-finder
+> cd client # where the fontend project is located
+> yarn install # install packages
+```
+
+### Running the Application Locally
+
+Start the local development server
+
+```bash
+> yarn dev # run the app
+```
+
+## Running the Application via Docker
+
+```bash
+> bash run.sh # or
+> docker build -t spot-finder-app:1.0 . # buld app
+> docker image ls # list images
+> docker run -d -p 3001:3001 --name spot-finder spot-finder-app:1.0
+> docker image prune -a --filter "until=24h" -f # clear images
+```
+
+## Project Folder Structure
+
+```bash
+├── public
+├── src
+   ├── app <- All the pages and app config
+   ├── assets <- Images, Fonts used in the project
+   ├── atoms <- reusable UI
+   ├── compponent <- Reusable components
+   ├── components <- Reusable components from shadcn UI
+   ├── data <- mock or dummy data
+   ├── lib <- Contains helper function and API connections
+├── index.html <- Entry Point
+├── README.md <- Developer Documentation
+├── package.json <- list of library used
+
+```
+
+### Deployment
+
+The project is deployed on vercel. You can access the web application here [Web App Link](https://spot-find.vercel.app)

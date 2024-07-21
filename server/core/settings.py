@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'django_filters',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -81,6 +82,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -103,14 +106,17 @@ TEMPLATES = [
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django_redshift_backend',
-        'NAME': 'dev',
-        'USER': 'awsuser',
-        'PASSWORD': 'Anjitha97',
-        'HOST': 'redshift-cluster-1.cqyedsmaziep.us-east-2.redshift.amazonaws.com',
-        'PORT': '5439',
-    }
-
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    # 'default': {
+    #     'ENGINE': 'django_redshift_backend',
+    #     'NAME': 'dev',
+    #     'USER': 'awsuser',
+    #     'PASSWORD': 'Anjitha97',
+    #     'HOST': 'redshift-cluster-1.cqyedsmaziep.us-east-2.redshift.amazonaws.com',
+    #     'PORT': '5439',
+    # },
 }
 # DATABASES = {
 #     'default': {
@@ -168,15 +174,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# print("superuser:", env('superuser', default='Not Set'))
-# print("awsuser:", env('awsuser', default='Not Set'))
-
-# # Debug prints to verify the environment variables
-# print("DEBUG: DB_USER =", env('DB_USER', default='Not Set'))
-# print("DEBUG: DB_PASSWORD =", env('DB_PASSWORD', default='Not Set'))
-# print("DEBUG: DB_HOST =", env('DB_HOST', default='Not Set'))
-# print("DEBUG: DB_PORT =", env('DB_PORT', default='Not Set'))
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
