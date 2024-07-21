@@ -13,18 +13,16 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer
-<<<<<<< HEAD
-=======
-from .s3_utiils import upload_file_to_s3,download_csv_from_s3
+from .s3_utiils import upload_file_to_s3, download_csv_from_s3
 from django.shortcuts import render
 from django.views import View
 from .athena_utils import execute_athena_query, get_query_results
 import boto3  # Make sure boto3 is imported
 from botocore.exceptions import ClientError
->>>>>>> ca96889 (code changes for Athena conection)
 
 from .models import User
-AWS_S3_REGION_NAME='us-east-1' 
+AWS_S3_REGION_NAME = 'us-east-1'
+
 
 class IsAdminOrUserPermission(permissions.BasePermission):
 
@@ -105,8 +103,7 @@ class PostList(generics.ListCreateAPIView):
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     pass
-<<<<<<< HEAD
-=======
+
 
 class UserView(APIView):
     permission_classes = [IsAdminOrUserPermission]
@@ -118,7 +115,7 @@ class UserView(APIView):
             if serializer.is_valid():
                 # Save user data
                 user = serializer.save()
-                
+
                 # Handle file upload to S3 if applicable
                 if 'file' in request.FILES:
                     file = request.FILES['file']
@@ -126,14 +123,15 @@ class UserView(APIView):
                     # Optionally, you can save the S3 file URL to your user object
                     # user.file_url = file_url
                     # user.save()
-                    
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except serializers.ValidationError as err:
             return Response(err.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exe:
             return Response({"detail": "Error creating user", "error": str(exe)}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
 class CSVDataView(APIView):
     def get(self, request):
         s3_key = 'SampleAthena/sample.csv'
@@ -142,24 +140,25 @@ class CSVDataView(APIView):
             return JsonResponse({'data': data.to_dict(orient='records')})
         else:
             return JsonResponse({'error': 'Failed to fetch data from S3'}, status=500)
-        
+
 
 class AthenaQueryView(View):
     template_name = 'athena_results.html'
     query = "SELECT * FROM sample_db.sampletable LIMIT 10;"
     database = "sample_db"
     output_location = "s3://spotfinder-data-bucket/Athena_output/"
-    
 
     def get(self, request):
         try:
-            query_execution_id = execute_athena_query(self.query, self.database, self.output_location)
+            query_execution_id = execute_athena_query(
+                self.query, self.database, self.output_location)
             results_df = get_query_results(query_execution_id)
             results = results_df.to_html()
         except Exception as e:
             results = str(e)
 
         return render(request, self.template_name, {'results': results})
+
     def check_query_status(query_execution_id):
         athena_client = boto3.client('athena', region_name=AWS_S3_REGION_NAME)
         max_attempts = 5  # Adjust this as needed
@@ -167,7 +166,8 @@ class AthenaQueryView(View):
 
         for attempt in range(max_attempts):
             try:
-                response = athena_client.get_query_execution(QueryExecutionId=query_execution_id)
+                response = athena_client.get_query_execution(
+                    QueryExecutionId=query_execution_id)
                 query_status = response['QueryExecution']['Status']['State']
                 return query_status
             except ClientError as e:
@@ -181,4 +181,3 @@ class AthenaQueryView(View):
                     return None  # Or handle the error appropriately
 
         return None  # Fallback if all retries fail
->>>>>>> ca96889 (code changes for Athena conection)
