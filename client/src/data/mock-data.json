@@ -12,5 +12,26 @@
     "state": "Toronto",
     "latitude": 43.681482424186036,
     "longitude": -79.34282393314058
+  },
+  {
+    "city": "Colling wood Parking",
+    "image": "http://upload.wikimedia.org/wikipedia/commons/thumb/5/57/LA_Skyline_Mountains2.jpg/240px-LA_Skyline_Mountains2.jpg",
+    "state": "Ontario",
+    "latitude": 44.5042957,
+    "longitude": -80.3818087
+  },
+  {
+    "city": "120 176 St Parking",
+    "image": "https://en.wikipedia.org/wiki/Surrey,_British_Columbia#/media/File:Holland_Park,_Surrey_BC.jpg",
+    "state": "Surrey",
+    "latitude": 49.0042214,
+    "longitude": -122.734382
+  },
+  {
+    "city": "630 8 St Parking",
+    "image": "http://upload.wikimedia.org/wikipedia/commons/thumb/5/57/LA_Skyline_Mountains2.jpg/240px-LA_Skyline_Mountains2.jpg",
+    "state": "Canmore",
+    "latitude": 51.089469,
+    "longitude": -115.360274
   }
 ]

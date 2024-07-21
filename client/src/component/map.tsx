@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import Map, {
   Marker,
   Popup,
@@ -16,12 +16,12 @@ import CITIES from "../data/mock-data.json";
 const TOKEN =
   "pk.eyJ1IjoicHJha2FzaHB1bjIyIiwiYSI6ImNsdzUzd3J5cjFoaTQya242YTgzcXlvZncifQ.frgsDUb2l3D8ZolT50Ab1w"; // Set your mapbox token here
 
+const locationIconUrl = "https://cdn0.iconfinder.com/data/icons/material-design-flat/24/location-256.png";
+
 export const MapComponent = () => {
   const [popupInfo, setPopupInfo] = useState<any>(null);
-  const [, setLng] = useState(-79.3323053);
-  const [, setLat] = useState(43.7535611);
-  const [, setZoom] = useState(9);
   const [pointer, setPointer] = useState<any>();
+  const [currentLocationMarker, setCurrentLocationMarker] = useState<any>(null);
 
   const pins = useMemo(
     () =>
@@ -43,9 +43,7 @@ export const MapComponent = () => {
   );
 
   const onMarkerDrag = useCallback((event: any) => {
-    setLat(event?.viewState?.latitude.toFixed(4));
-    setLng(event.viewState.longitude.toFixed(4));
-    setZoom(event?.viewState?.zoom?.toFixed(2));
+    // Handle marker drag events if needed
   }, []);
 
   const handleClick = async (event: any) => {
@@ -71,11 +69,28 @@ export const MapComponent = () => {
     }
   };
 
+  const showCurrentLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log("Current location:", { latitude, longitude }); // Debugging line
+        setCurrentLocationMarker({
+          latitude,
+          longitude,
+        });
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+      }
+    );
+  };
+
+  useEffect(() => {
+    showCurrentLocation();
+  }, []);
+
   return (
-    <div className="map-container rounded-sm">
-      {/* <div className="sidebar">
-        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
-      </div> */}
+    <div className="map-container" style={{ width: "100%", height: "100%" }}>
       <Map
         initialViewState={{
           latitude: 43.7535611,
@@ -84,18 +99,24 @@ export const MapComponent = () => {
           bearing: 0,
           pitch: 0,
         }}
+        style={{ width: "100%", height: "100%" }}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={TOKEN}
         onDrag={onMarkerDrag}
         onClick={handleClick}
       >
+        {/* Geolocate control */}
         <GeolocateControl position="top-left" />
+
+        {/* Other controls */}
         <FullscreenControl position="top-left" />
         <NavigationControl position="top-left" />
         <ScaleControl />
 
+        {/* Render markers */}
         {pins}
 
+        {/* Popup for city information */}
         {popupInfo && (
           <Popup
             anchor="top"
@@ -106,9 +127,11 @@ export const MapComponent = () => {
             <div>
               {popupInfo.city}, {popupInfo.state} |{" "}
             </div>
-            <img width="100%" src={popupInfo.image} />
+            <img width="100%" src={popupInfo.image} alt={popupInfo.city} />
           </Popup>
         )}
+
+        {/* Popup for pointer location */}
         {pointer?.address && (
           <Popup
             anchor="top"
@@ -117,13 +140,18 @@ export const MapComponent = () => {
             onClose={() => setPointer(null)}
           >
             <div>{pointer?.address || ""}</div>
-            {/* <img
-              width="100%"
-              src={
-                "http://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Above_Gotham.jpg/240px-Above_Gotham.jpg"
-              }
-            /> */}
           </Popup>
+        )}
+
+        {/* Marker for current location */}
+        {currentLocationMarker && (
+          <Marker
+            latitude={currentLocationMarker.latitude}
+            longitude={currentLocationMarker.longitude}
+            anchor="bottom"
+          >
+            <img src={locationIconUrl} alt="Current Location" style={{ width: "60px", height: "60px" }} /> {/* Edited line */}
+          </Marker>
         )}
       </Map>
     </div>
