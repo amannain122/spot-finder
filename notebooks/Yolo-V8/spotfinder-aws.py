@@ -1,22 +1,13 @@
-import os
 import cv2
 import numpy as np
 from ultralytics import YOLO
 import yt_dlp
 import pandas as pd
-import csv
 from datetime import datetime
 from multiprocessing import Process
-import boto3
-from botocore.exceptions import NoCredentialsError
-from dotenv import load_dotenv
-
-load_dotenv()
-
 
 # Function to process each parking lot
-def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path, s3_bucket_name, role_arn,
-                        region_name='us-west-2'):
+def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path):
     # Load the YOLO model
     model = YOLO('yolov8n.pt')
 
@@ -49,7 +40,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
         return
 
     # Initialize list to track if bounding boxes are empty or not
-    bounding_boxes_status = [False] * len(bounding_box_areas)
+    bounding_boxes_status = ['empty'] * len(bounding_box_areas)
     prev_empty_boxes = len(bounding_box_areas)
 
     # Loop through the video frames
@@ -65,7 +56,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
         class_names = model.names
 
         # Reset bounding boxes status for this frame
-        bounding_boxes_status = [False] * len(bounding_box_areas)
+        bounding_boxes_status = ['empty'] * len(bounding_box_areas)
 
         # Iterate through detections and check if 'car' or 'truck' is within any of the specified bounding box areas
         for detection in detections:
@@ -85,7 +76,7 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
                     if point_in_polygon >= 0:
                         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                         cv2.circle(frame, (cx, cy), 3, (0, 0, 255), -1)
-                        bounding_boxes_status[i] = True
+                        bounding_boxes_status[i] = 'occupied'
                         break
                 else:
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
@@ -96,18 +87,18 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
             area_center = np.mean(area, axis=0).astype(int)
             cv2.putText(frame, f'SP{i + 1}', tuple(area_center), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
-        empty_boxes = bounding_boxes_status.count(False)
+        empty_boxes = bounding_boxes_status.count('empty')
 
         # Print only when the empty_boxes value changes
         if empty_boxes != prev_empty_boxes:
             print(f"Number of empty lots for {parking_lot_id}: {empty_boxes}")
             print(f"Number of occupied lots for {parking_lot_id}: {len(bounding_box_areas) - empty_boxes}")
             for i, status in enumerate(bounding_boxes_status):
-                print(f"{parking_lot_id} SP{i + 1} is {'occupied' if status else 'empty'}")
+                print(f"{parking_lot_id} SP{i + 1} is {status}")
 
             # Write the data to the CSV file
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            row = [parking_lot_id, timestamp] + ['occupied' if status else 'empty' for status in bounding_boxes_status]
+            row = [parking_lot_id, timestamp] + bounding_boxes_status
 
             # Read existing data
             try:
@@ -117,38 +108,18 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
                     index = df[df['ParkingLotID'] == parking_lot_id].index[0]
                     # Update only the status columns and timestamp
                     for i in range(len(bounding_boxes_status)):
-                        df.loc[index, f'SP{i + 1}'] = 'occupied' if bounding_boxes_status[i] else 'empty'
+                        df.loc[index, f'SP{i + 1}'] = bounding_boxes_status[i]
                     df.loc[index, 'Timestamp'] = timestamp
                 else:
                     # Create a new row with correct columns
-                    new_df = pd.DataFrame([row], columns=['ParkingLotID', 'Timestamp'] + [f'SP{i + 1}' for i in range(
-                        len(bounding_box_areas))])
+                    new_df = pd.DataFrame([row], columns=['ParkingLotID', 'Timestamp'] + [f'SP{i + 1}' for i in range(len(bounding_box_areas))])
                     df = pd.concat([df, new_df], ignore_index=True)
             except FileNotFoundError:
                 # Create a new DataFrame if the file doesn't exist
-                df = pd.DataFrame([row], columns=['ParkingLotID', 'Timestamp'] + [f'SP{i + 1}' for i in
-                                                                                  range(len(bounding_box_areas))])
+                df = pd.DataFrame([row], columns=['ParkingLotID', 'Timestamp'] + [f'SP{i + 1}' for i in range(len(bounding_box_areas))])
 
             # Write the DataFrame back to the CSV file
             df.to_csv(output_csv_path, index=False)
-            print('toS3')
-
-            # Upload to S3
-            try:
-                s3_client = boto3.client(
-                    's3',
-                    aws_access_key_id=os.getenv('AWS_ACCESS_KEY'),
-                    aws_secret_access_key=os.getenv('AWS_SECRET_KEY'),
-                    region_name='us-east-1'
-                )
-
-                s3_client.upload_file(output_csv_path, s3_bucket_name, output_csv_path)
-                print('reachedHere7')
-                print(f"File uploaded to S3 bucket {s3_bucket_name} successfully.")
-            except NoCredentialsError:
-                print("Credentials not available for uploading to S3.")
-            except Exception as e:
-                print(f"Error uploading to S3: {e}")
 
             prev_empty_boxes = empty_boxes
 
@@ -166,12 +137,10 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 def main():
     parking_lots_csv_path = 'parking_lots.csv'
     output_csv_path = 'SampleAthena/parking_status/parking_status.csv'
-    s3_bucket_name = 'spotfinder-data-bucket'
-    role_arn = 'arn:aws:s3:::spotfinder-data-bucket/SampleAthena/parking_status/'
-
 
     # Read the parking lots CSV
     parking_lots_data = pd.read_csv(parking_lots_csv_path)
+
     processes = []
 
     # Start a process for each parking lot
@@ -180,8 +149,7 @@ def main():
         video_url = lot['URL']
         roi_csv_path = lot['ROI']
 
-        p = Process(target=process_parking_lot,
-                    args=(parking_lot_id, video_url, roi_csv_path, output_csv_path, s3_bucket_name, role_arn))
+        p = Process(target=process_parking_lot, args=(parking_lot_id, video_url, roi_csv_path, output_csv_path))
         p.start()
         processes.append(p)
 
