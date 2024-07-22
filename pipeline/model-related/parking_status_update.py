@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 # Load the CSV file
-file_path = 'D:/spot-finder/data/parking_status.csv'
+file_path = '/home/ubuntu/spot-finder/notebooks/Yolo-V8/SampleAthena/parking_status/parking_status.csv'
 parking_data = pd.read_csv(file_path)
 
 # Function to calculate fare based on duration
@@ -40,7 +40,7 @@ for spot in ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'SP6', 'SP7']:
 results_df = pd.DataFrame(results, columns=['ParkingSpotID', 'CustomerID', 'InTime', 'OutTime', 'DurationHours', 'Fare'])
 
 # Ensure the output directory exists
-output_directory = 'D:/spot-finder/data'
+output_directory = '/home/ubuntu/spot-finder/pipeline/model-related/data'
 os.makedirs(output_directory, exist_ok=True)
 
 # Save the results to a new CSV file
@@ -48,7 +48,7 @@ output_file_path = os.path.join(output_directory, 'parking_fares.csv')
 results_df.to_csv(output_file_path, index=False)
 
 # Save the updated original CSV file
-updated_file_path = 'D:/spot-finder/data/parking_status.csv'
+updated_file_path = '/home/ubuntu/spot-finder/pipeline/model-related/data/parking_status.csv'
 parking_data.to_csv(updated_file_path, index=False)
 
 print(results_df.head())
