@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import data_load_upload as dlu
+import data_loader as dlu
 import aws
 
 spot_finder_dir = dlu.find_spot_finder_dir()
@@ -44,4 +44,3 @@ results_df = pd.DataFrame(results, columns=['ParkingLotID', 'ParkingSpotID', 'Cu
 results_file_path = os.path.join(spot_finder_dir, 'data', 'parking_fares_calculated.csv')
 results_df.to_csv(results_file_path, index=False)
 
-aws.upload_to_s3(results_file_path)
