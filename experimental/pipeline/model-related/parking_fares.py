@@ -1,7 +1,11 @@
+import os
 import pandas as pd
+import data_load_upload as dlu
+import aws
 
+spot_finder_dir = dlu.find_spot_finder_dir()
 # Load the CSV file
-parking_status_path = 'D:\spot-finder\data\parking_status.csv'
+parking_status_path = os.path.join(spot_finder_dir, 'data', 'parking_status.csv')
 parking_data = pd.read_csv(parking_status_path)
 
 # Function to calculate fare based on duration
@@ -37,8 +41,7 @@ for spot in [f'SP{i}' for i in range(1, 24)]:
 results_df = pd.DataFrame(results, columns=['ParkingLotID', 'ParkingSpotID', 'CustomerID', 'InTime', 'OutTime', 'DurationHours', 'Fare'])
 
 # Save the results to a new CSV file
-results_file_path = 'D:\spot-finder\data\parking_fares_calculated.csv'
+results_file_path = os.path.join(spot_finder_dir, 'data', 'parking_fares_calculated.csv')
 results_df.to_csv(results_file_path, index=False)
 
-# Display the first few rows of the results
-print(results_df.head())
+aws.upload_to_s3(results_file_path)
