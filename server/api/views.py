@@ -1,10 +1,8 @@
-import os
-import pandas as pd
+
 from rest_framework import generics
 from api.models import Post
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer, PostSerializer
 from django.conf import settings
 from django.middleware.csrf import get_token
 from rest_framework import status
@@ -12,11 +10,9 @@ from rest_framework import serializers
 from rest_framework import permissions
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingStatusSerializer
-from django.http import JsonResponse
-from django.db import connection
+from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingLotSerializer
+from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
 from .models import User
-from django.http import JsonResponse
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):
@@ -100,51 +96,98 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     pass
 
 
-def list_redshift_tables(request):
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT table_schema, table_name
-            FROM information_schema.tables
-            WHERE table_type = 'BASE TABLE'
-              AND table_schema NOT IN ('information_schema', 'pg_catalog')
-        """)
-        rows = cursor.fetchall()
-        columns = [col[0] for col in cursor.description]
-        data = [dict(zip(columns, row)) for row in rows]
-    return JsonResponse(data, safe=False)
+class UserView(APIView):
+    permission_classes = [IsAdminOrUserPermission]
+
+    def post(self, request, format='json'):
+        try:
+            serializer = UserSerializer(
+                data=request.data, context={"request": request})
+            if serializer.is_valid():
+                # Save user data
+                user = serializer.save()
+
+                # Handle file upload to S3 if applicable
+                if 'file' in request.FILES:
+                    file = request.FILES['file']
+                    # file_url = upload_file_to_s3(file)
+                    # Optionally, you can save the S3 file URL to your user object
+                    # user.file_url = file_url
+                    # user.save()
+
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except serializers.ValidationError as err:
+            return Response(err.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as exe:
+            return Response({"detail": "Error creating user", "error": str(exe)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+def merge_data(metadata, spots):
+    parking_lots = []
+    for idx, lot in enumerate(metadata):
+        lot_spots = [spot for spot in spots if spot["ParkingLotID"]
+                     == lot["ParkingLotID"]]
+        spots_list = [{"spot": f"SP{i}", "status": lot_spots[0].get(
+            f"SP{i}", "empty")} for i in range(1, 24)]
+        coordinates = {"latitude": 0.0, "longitude": 0.0}
+        if lot["Location"]:
+            lat, lon = map(float, lot["Location"].split(","))
+            coordinates = {"latitude": lat, "longitude": lon}
+        total_spots = lot["Number of Spots"]
+        available_spots = sum(
+            1 for spot in spots_list if spot["status"] == "empty")
+        reserved_spots = total_spots - available_spots
+        parking_lots.append({
+            "id": idx + 1,
+            "parking_id": lot["ParkingLotID"],
+            "coordinates": coordinates,
+            "total_spots": total_spots,
+            "available_spots": available_spots,
+            "reserved_spots": reserved_spots,
+            "address": lot["Address"],
+            "image": lot["URL"],
+            "spots": spots_list
+        })
+    return parking_lots
 
 
 class ParkingStatusView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        file_path = os.path.join(
-            settings.BASE_DIR, 'data/parking_status.csv')
-        parking_data = pd.read_csv(file_path)
+        query = "SELECT * FROM athena_spot_finder.parking_lots;"
+        database = "sample_db"
+        output_location = "s3://spotfinder-data-bucket/Athena_output/"
+        query_execution_id = query_athena(query, database, output_location)
+        results = get_query_results(query_execution_id)
 
-        # Get the latest data (assuming the CSV is sorted by Timestamp)
-        latest_data = parking_data.iloc[-1]
-
-        total_spots = len(latest_data) - 1
-        available_spots = (latest_data == 'empty').sum()
-        reserved_spots = (latest_data == 'occupied').sum()
-
-        # Prepare the spots data
-        spots = [
-            {'spot': spot, 'status': latest_data[spot]}
-            for spot in latest_data.index if spot != 'Timestamp'
-        ]
-
-        # Prepare the response data
-        response_data = {
-            "id": 1,
-            'coordinates': {"latitude": 43.7760345, "longitude": -79.2601504},
-            'total_spots': total_spots,
-            'available_spots': available_spots,
-            'reserved_spots': reserved_spots,
-            'spots': spots,
-        }
-
-        serializer = ParkingStatusSerializer(response_data)
-
+        spots_data = results_to_dataframe(results)
+        data = merge_data(METADATA, spots_data)
+        serializer = ParkingLotSerializer(data, many=True)
         return Response(serializer.data)
+
+
+class ParkingLotView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, parking_lot_id=None):
+        query = "SELECT * FROM athena_spot_finder.parking_lots;"
+        database = "sample_db"
+        output_location = "s3://spotfinder-data-bucket/Athena_output/"
+        query_execution_id = query_athena(query, database, output_location)
+        results = get_query_results(query_execution_id)
+        spots_data = results_to_dataframe(results)
+
+        data = merge_data(METADATA, spots_data)
+        if parking_lot_id:
+            parking_lot = next(
+                (lot for lot in data if lot["parking_id"] == parking_lot_id), None)
+            if parking_lot:
+                serializer = ParkingLotSerializer(parking_lot)
+                return Response(serializer.data)
+            else:
+                return Response({"error": "Parking lot not found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            serializer = ParkingLotSerializer(data, many=True)
+            return Response(serializer.data)
