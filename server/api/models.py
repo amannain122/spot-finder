@@ -116,7 +116,7 @@ class Booking(models.Model):
     parking_id = models.CharField(max_length=10, choices=PARKING_LOT_CHOICES)
     parking_spot = models.CharField(max_length=10)
     parking_charge = models.DecimalField(max_digits=10, decimal_places=2)
-    parking_time = models.DateTimeField(default=timezone.now)
+    parking_time = models.ImageField(default=None)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 

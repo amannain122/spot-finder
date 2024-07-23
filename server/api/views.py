@@ -15,7 +15,7 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingLotSerializer, BookingSerializer
@@ -212,6 +212,11 @@ class ParkingLotView(APIView):
 
 
 class BookingViewSet(ListCreateAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
+
+class BookingDestroyViewSet(RetrieveDestroyAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
