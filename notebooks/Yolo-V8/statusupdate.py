@@ -3,7 +3,9 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 from dotenv import load_dotenv
 
-csv_path = 'SampleAthena/parking_status/parking_status.csv'
+load_dotenv()
+
+csv_path = '/home/ubuntu/spot-finder/notebooks/Yolo-V8/SampleAthena/parking_status/parking_status.csv'
 s3_bucket_name = 'spotfinder-data-bucket'
 role_arn = 'arn:aws:s3:::spotfinder-data-bucket/SampleAthena/parking_status/'
 
