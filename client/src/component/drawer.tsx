@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import React from "react";
 import { ParkingList } from "./parking-card";
 
-export const MapDrawer = () => {
+export const MapDrawer = ({ parkingList }: any) => {
   return (
     <div>
       <Drawer>
@@ -26,7 +26,7 @@ export const MapDrawer = () => {
           </DrawerHeader>
           <div>
             <div className="">
-              <ParkingList />
+              <ParkingList parkingList={parkingList} />
             </div>
           </div>
           <DrawerFooter>

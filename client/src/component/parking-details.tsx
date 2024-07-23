@@ -1,9 +1,9 @@
 "use client";
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { MapDetail } from "./map-detail";
-import QRCodeComponent from "../component/QRCodeComponent";
 import { DrawerPark } from "./parking-drawer";
+import { getSingleParkingSpot } from "@/lib/server";
 
 const parkingLots = [
   {
@@ -35,11 +35,21 @@ const parkingLots = [
 const ParkingDetail = () => {
   const searchParams = useSearchParams();
   const search = searchParams.get("id");
-  const parkingDtl: any = parkingLots?.find((data: any) => data?.id === search);
 
-  const qrCodeUrl = `http://localhost:3000/parking-detail?id=${search}`;
+  const [parkingSpot, setParkingSpot] = useState<any>([]);
 
-  console.log(search, parkingDtl);
+  useEffect(() => {
+    const getSpot = async () => {
+      if (!search) return;
+      const response = await getSingleParkingSpot(search || "PL01");
+      if (response.status === "success") {
+        setParkingSpot(response.data);
+      }
+    };
+
+    getSpot();
+  }, []);
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div>
@@ -48,13 +58,15 @@ const ParkingDetail = () => {
             {/* Add the Discover Affordable Parking Effortlessly with Spot Finder */}
             <div className=" p-4">
               <h2 className="text-lg font-semibold mb-2">
-                {parkingDtl?.address || ""}
+                {parkingSpot?.address || ""}
               </h2>
               <div className="flex justify-between items-center mb-2">
-                <span>Availability - {parkingDtl?.availability || "N/A"}</span>
+                <span>
+                  Availability - {parkingSpot?.available_spots || "N/A"}
+                </span>
               </div>
               <div className="mb-4">
-                Rating: <span>{parkingDtl?.rating?.toFixed(1) || ""}</span>
+                Rating: <span>{parkingSpot?.rating?.toFixed(1) || "5"}</span>
               </div>
 
               <br />
@@ -63,19 +75,8 @@ const ParkingDetail = () => {
             </div>
           </div>
 
-          <div className="flex-grow">
-            <img
-              src={parkingDtl?.image || ""}
-              alt="Parking Lot"
-              className=" w-full h-full object-cover rounded-lg border-2"
-              style={{ width: "500px", height: "200px" }}
-            />
-          </div>
           <MapDetail />
         </div>
-        {/* <div style={{ position: "absolute", top: "20%", right: "18%" }}>
-          <QRCodeComponent url={qrCodeUrl} />
-        </div> */}
       </div>
     </Suspense>
   );
