@@ -1,13 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getParkingSpot } from "@/lib/server";
+
 const ParkingLotCard = ({
   image,
   address,
   distance,
   availability,
   rating,
+  id,
 }: any) => {
+  const router = useRouter();
+
   return (
-    <div className="flex items-center p-2 bg-gray-50 rounded-lg shadow-md mb-4">
+    <div
+      onClick={() => router.push(`/parking?id=${id}`)}
+      className="flex items-center p-2 bg-gray-50 rounded-lg shadow-md mb-4 cursor-pointer"
+    >
       <img
         src={image}
         alt="Parking Lot"
@@ -40,6 +51,7 @@ const parkingLots = [
     distance: "900 m",
     availability: 3,
     rating: 4.2,
+    id: 1,
   },
   {
     image: "/image2.png", // Replace with actual image URL
@@ -47,6 +59,7 @@ const parkingLots = [
     distance: "1.2 km",
     availability: 1,
     rating: 4.0,
+    id: 2,
   },
   {
     image: "/image3.png", // Replace with actual image URL
@@ -54,12 +67,38 @@ const parkingLots = [
     distance: "1.9 km",
     availability: 2,
     rating: 4.6,
+    id: 3,
   },
 ];
 
 export const ParkingList = () => {
+  const [parkingSpot, setParkingSpot] = useState<any>({});
+
+  useEffect(() => {
+    // get parking spot detail from the backend
+    const getSpot = async () => {
+      const response = await getParkingSpot();
+      if (response.status === "success") {
+        console.log(response.data);
+        setParkingSpot(response.data);
+      }
+    };
+
+    getSpot();
+  }, []);
+
   return (
-    <div className="min-h-screen p-6">
+    <div className=" p-6">
+      {parkingSpot ? (
+        <ParkingLotCard
+          image={"image3.png"}
+          address={"Stream Test Address"}
+          distance={"20"}
+          availability={parkingSpot?.available_spots || 1}
+          rating={2.2}
+          id={4}
+        />
+      ) : null}
       {parkingLots.map((lot, index) => (
         <ParkingLotCard
           key={index}
@@ -68,6 +107,7 @@ export const ParkingList = () => {
           distance={lot.distance}
           availability={lot.availability}
           rating={lot.rating}
+          id={lot.id}
         />
       ))}
     </div>

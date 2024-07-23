@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import PostList, PostDetail, UserView, TokenObtainView, GenerateQRCodeAPIView, confirm_booking
+from .views import PostList, PostDetail, UserView, TokenObtainView, ParkingStatusView, ParkingLotView
 
 app_name = 'spotFinder'
 
@@ -10,4 +11,8 @@ urlpatterns = [
     path('', PostList.as_view(), name='post_list'),
     path('generate-qr/', GenerateQRCodeAPIView.as_view(), name='generate-qr'),
     path('confirm-booking/', confirm_booking, name='confirm_booking'),
+    path('parking-status/', ParkingStatusView.as_view(), name='parking_status'),
+    path('parkinglots/<str:parking_lot_id>/',
+         ParkingLotView.as_view(), name='parkinglot-detail'),
+
 ]
