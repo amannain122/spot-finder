@@ -125,3 +125,22 @@ class ParkingStatusSerializer(serializers.Serializer):
 # 		},
 # 	]
 # }
+
+# parking_app/serializers.py
+
+
+class ParkingSpotSerializer(serializers.Serializer):
+    spot = serializers.CharField(max_length=10)
+    status = serializers.CharField(max_length=10)
+
+
+class ParkingLotSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    parking_id = serializers.CharField(max_length=10)
+    coordinates = serializers.DictField()
+    total_spots = serializers.IntegerField()
+    available_spots = serializers.IntegerField()
+    reserved_spots = serializers.IntegerField()
+    address = serializers.CharField(max_length=200)
+    image = serializers.URLField()
+    spots = ParkingSpotSerializer(many=True)
