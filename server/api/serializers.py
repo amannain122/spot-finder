@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import CustomUser, User, Post, Bookings
+from .models import CustomUser, User, Post, Booking
 
 
 class MyTokenObtaionPairSerializer(TokenObtainPairSerializer):
@@ -82,12 +82,6 @@ class QRCodeSerializer(serializers.Serializer):
     data = serializers.CharField(max_length=200)
 
 
-class BookingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bookings
-        fields = ['parking_id', 'parking_spot_no',]
-
-
 class CoordinatesSerializer(serializers.Serializer):
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
@@ -105,39 +99,6 @@ class ParkingStatusSerializer(serializers.Serializer):
         )
     )
 
-# {
-# 	"parkingSpots": [
-# 		{
-# 			"id": "1",
-# 			"coordinates": {
-# 				"latitude": 40.7128,
-# 				"longitude": -74.0060
-# 			}
-# 			"availability": "vacant",
-# 			"type": "street",
-# 			"capacity": 10,
-# 			"availableSpace": 2,
-# 			"price": 5.00,
-# 			"timeRestrictions": "No restrictions"
-# 		},
-# 		{
-# 			"id": "2",
-# 			"coordinates": {
-# 				"latitude": 40.7306,
-# 				"longitude": -73.9352
-# 			}
-# 			"availability": "occupied",
-# 			"type": "garage",
-# 			"capacity": 50,
-# 			"availableSpace": 2,
-# 			"price": 10.00,
-# 			"timeRestrictions": "2-hour limit"
-# 		},
-# 	]
-# }
-
-# parking_app/serializers.py
-
 
 class ParkingSpotSerializer(serializers.Serializer):
     spot = serializers.CharField(max_length=10)
@@ -154,3 +115,12 @@ class ParkingLotSerializer(serializers.Serializer):
     address = serializers.CharField(max_length=200)
     image = serializers.URLField()
     spots = ParkingSpotSerializer(many=True)
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = [
+            'id', 'user', 'parking_id', 'parking_spot', 'parking_charge',
+            'parking_time', 'created_at', 'updated_at'
+        ]

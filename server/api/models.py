@@ -105,13 +105,20 @@ class Post(models.Model):
         return f'{self.pk}'
 
 
-class Bookings(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    parking_id = models.FloatField()
-    parking_spot_no = models.FloatField()
-    date = models.DateField()
-    time = models.TimeField()
-    parking_charge = models.FloatField()
+class Booking(models.Model):
+    PARKING_LOT_CHOICES = [
+        ('PL01', 'PL01'),
+        ('PL02', 'PL02'),
+        ('PL03', 'PL03'),
+    ]
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, blank=True, null=True)
+    parking_id = models.CharField(max_length=10, choices=PARKING_LOT_CHOICES)
+    parking_spot = models.CharField(max_length=10)
+    parking_charge = models.DecimalField(max_digits=10, decimal_places=2)
+    parking_time = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"Booking by {self.user.username} for parking spot {self.parking_spot_no}"
+        return f"Booking by {self.user.email} for parking spot {self.parking_spot_no}"
