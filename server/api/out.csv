@@ -1,9 +1,0 @@
-parkinglotid
-"ParkingLotID,URL,Location,Number of Spots,ROI,Address"
-"PL01,https://www.youtube.com/watch?v=HBDD3j5so0g,""49.00426480950375, -122.73464953172447"",13,PL01.csv,""120 176 St, Surrey, BC V3S 9S2"
-"PL02,https://www.youtube.com/watch?v=EPKWu223XEg,,23,PL02.csv,"
-"PL03,https://www.youtube.com/watch?v=kC6_JqEt3GA,""51.08961722612397, -115.35780639113904"",5,PL03.csv,""630 8 St, Canmore, AB T1W 2B5"
-"ParkingLotID,Timestamp,SP1,SP2,SP3,SP4,SP5,SP6,SP7,SP8,SP9,SP10,SP11,SP12,SP13,SP14,SP15,SP16,SP17,SP18,SP19,SP20,SP21,SP22,SP23"
-"PL02,2024-07-21 23:04:22,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,occupied,empty,empty,empty,empty,empty,empty,occupied,empty"
-"PL01,2024-07-21 23:05:07,empty,occupied,occupied,occupied,empty,empty,empty,empty,occupied,empty,empty,empty,empty,,,,,,,,,,"
-"PL03,2024-07-21 23:05:21,empty,empty,empty,empty,empty,,,,,,,,,,,,,,,,,,"
