@@ -47,6 +47,4 @@ os.makedirs(output_directory, exist_ok=True)
 # Save the results to a new CSV file
 output_file_path = os.path.join(output_directory, 'parking_fares_calculated.csv')
 results_df.to_csv(output_file_path, index=False)
-#results_file_path = os.path.join(spot_finder_dir, 'data', 'parking_fares_calculated.csv')
-#results_df.to_csv(results_file_path, index=False)
 
