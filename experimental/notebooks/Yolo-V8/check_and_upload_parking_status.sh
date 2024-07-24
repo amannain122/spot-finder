@@ -4,9 +4,9 @@
 PROCESS_NAME="statusupdate.py"
 
 # Define the full path to your script
-SCRIPT_PATH="/home/ubuntu/spot-finder/notebooks/Yolo-V8/statusupdate.py"
+SCRIPT_PATH="/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/statusupdate.py"
 
-LOG_FILE="/home/ubuntu/spot-finder/notebooks/Yolo-V8/logs/upload_status.log"
+LOG_FILE="/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/logs/upload_status.log"
 
 source /home/ubuntu/spot-finder/venv/bin/activate
 

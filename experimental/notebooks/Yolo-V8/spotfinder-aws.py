@@ -135,8 +135,8 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 
 # Main function to read the parking_lots.csv and start processes
 def main():
-    parking_lots_csv_path = '/home/ubuntu/spot-finder/notebooks/Yolo-V8/parking_lots.csv'
-    output_csv_path = '//home/ubuntu/spot-finder/notebooks/Yolo-V8/SampleAthena/parking_status/parking_status.csv'
+    parking_lots_csv_path = '/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/parking_lots.csv'
+    output_csv_path = '//home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/SampleAthena/parking_status/parking_status.csv'
 
     # Read the parking lots CSV
     parking_lots_data = pd.read_csv(parking_lots_csv_path)
