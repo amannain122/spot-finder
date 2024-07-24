@@ -1,4 +1,0 @@
-numpy==1.26.4
-opencv-python==4.9.0.80
-ultralytics==8.2.14
-pafy==0.5.5
