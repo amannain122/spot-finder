@@ -1,30 +1,18 @@
 
-from rest_framework import generics
-from api.models import Post
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from django.conf import settings
 from django.middleware.csrf import get_token
-from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from rest_framework import serializers
 from rest_framework import permissions
 from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-<<<<<<< HEAD
-from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView
-=======
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
->>>>>>> 981a5d780608ce05eaf04efc7a2a2089f873c257
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingLotSerializer, BookingSerializer
+from .serializers import UserSerializer, MyTokenObtaionPairSerializer, BookingSerializer, ParkingLotSerializer
 from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
-from .models import User, Booking, CustomUser
+from .models import User, Booking
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):
@@ -97,25 +85,6 @@ class UserView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class PostList(generics.ListCreateAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-
-
-class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-    pass
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def confirm_booking(request):
-    serializer = BookingSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save(user=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserView(APIView):

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import CustomUser, User, Post, Booking
+from .models import CustomUser, User, Booking
 
 
 class MyTokenObtaionPairSerializer(TokenObtainPairSerializer):
@@ -68,18 +68,6 @@ class UserSerializer(serializers.ModelSerializer):
         if ('password' in [x for x in validated_data]):
             validated_data.pop('password')
         return super().update(instance, validated_data)
-
-
-class PostSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Post
-        fields = ('id', 'coordinates', 'availability', 'capacity',
-                  'available_space', 'price', 'time_restrictions')
-
-
-class QRCodeSerializer(serializers.Serializer):
-    data = serializers.CharField(max_length=200)
 
 
 class CoordinatesSerializer(serializers.Serializer):
