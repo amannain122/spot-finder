@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, User
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.db import models
@@ -103,3 +103,43 @@ class Post(models.Model):
 
     def __str__(self):
         return f'{self.pk}'
+
+
+class Booking(models.Model):
+    PARKING_LOT_CHOICES = [
+        ('PL01', 'PL01'),
+        ('PL02', 'PL02'),
+        ('PL03', 'PL03'),
+    ]
+    PARKING_TIME_CHOICES = [
+        (1, '1 hour'),
+        (2, '2 hours'),
+        (3, '3 hours'),
+        (4, '4 hours'),
+        (5, '5 hours'),
+        (6, '6 hours'),
+        (7, '7 hours'),
+        (8, '8 hours'),
+    ]
+
+    BOOKING_STATUS_CHOICES = [
+        ('booked', 'Booked'),
+        ('canceled', 'Canceled'),
+        ('expired', 'Expired'),
+    ]
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, blank=True, null=True)
+    parking_id = models.CharField(max_length=10, choices=PARKING_LOT_CHOICES)
+    parking_spot = models.CharField(max_length=10, unique=True)
+    parking_charge = models.DecimalField(max_digits=10, decimal_places=2)
+    parking_time = models.DateTimeField(default=timezone.now)
+    booking_status = models.CharField(
+        max_length=10, choices=BOOKING_STATUS_CHOICES, default='booked')
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Booking by {self.user.email} for parking spot {self.parking_spot}s"
+
+    # class Meta:
+    #     unique_together = ('user', 'parking_spot')

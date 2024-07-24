@@ -34,7 +34,7 @@ export const MapComponent = () => {
           longitude={city.longitude}
           latitude={city.latitude}
           anchor="bottom"
-          onClick={(e) => {
+          onClick={(e: any) => {
             e.originalEvent.stopPropagation();
             setPopupInfo(city);
           }}
