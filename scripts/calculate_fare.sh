@@ -6,7 +6,7 @@ PROCESS_NAME="parking_fares.py"
 # Define the full path to your script
 SCRIPT_PATH="/home/ubuntu/spot-finder/experimental/pipeline/model-related/parking_fares.py"
 
-LOG_FILE="/home/ubuntu/spot-finder/experimental/pipeline/model-related/logs/parking_fares_status.log"
+LOG_FILE="/home/ubuntu/spot-finder/logs/parking_fares_status.log"
 
 source /home/ubuntu/spot-finder/venv/bin/activate
 
