@@ -1,9 +1,9 @@
 "use client";
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { MapDetail } from "./map-detail";
-import QRCodeComponent from "../component/QRCodeComponent";
 import { DrawerPark } from "./parking-drawer";
+import { getSingleParkingSpot } from "@/lib/server";
 
 const parkingLots = [
   {
@@ -32,29 +32,68 @@ const parkingLots = [
   },
 ];
 
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import { ParkingBox } from "./parking-box";
+
+const Box = ({ position, color }: any) => (
+  <mesh position={position}>
+    <boxGeometry args={[1, 1, 1]} />
+    <meshStandardMaterial color={color} />
+  </mesh>
+);
+
+const BoxVisualization = () => {
+  const boxes = [
+    { position: [-2, 0.5, 0], color: "orange" },
+    { position: [0, 0.5, 0], color: "orange" },
+    { position: [2, 0.5, 0], color: "orange" },
+    { position: [0, 0.5, -2], color: "orange" },
+  ];
+
+  return (
+    <Canvas camera={{ position: [5, 5, 5], fov: 50 }}>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} />
+      {boxes.map((box, index) => (
+        <Box key={index} position={box.position} color={box.color} />
+      ))}
+      <OrbitControls />
+    </Canvas>
+  );
+};
+
 const ParkingDetail = () => {
   const searchParams = useSearchParams();
   const search = searchParams.get("id");
-  const parkingDtl: any = parkingLots?.find((data: any) => data?.id === search);
 
-  const qrCodeUrl = `http://localhost:3000/parking-detail?id=${search}`;
+  const [parkingSpot, setParkingSpot] = useState<any>([]);
 
-  console.log(search, parkingDtl);
+  useEffect(() => {
+    const getSpot = async () => {
+      if (!search) return;
+      const response = await getSingleParkingSpot(search || "PL01");
+      if (response.status === "success") {
+        setParkingSpot(response.data);
+      }
+    };
+
+    getSpot();
+  }, []);
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div>
         <div>
           <div className="flex flex-row items-center justify-between w-full px-4 gap-8 mt-8">
-            {/* Add the Discover Affordable Parking Effortlessly with Spot Finder */}
             <div className=" p-4">
               <h2 className="text-lg font-semibold mb-2">
-                {parkingDtl?.address || ""}
+                {parkingSpot?.address || ""}
               </h2>
               <div className="flex justify-between items-center mb-2">
-                <span>Availability - {parkingDtl?.availability || "N/A"}</span>
-              </div>
-              <div className="mb-4">
-                Rating: <span>{parkingDtl?.rating?.toFixed(1) || ""}</span>
+                <span>
+                  Availability - {parkingSpot?.available_spots || "N/A"}
+                </span>
               </div>
 
               <br />
@@ -62,20 +101,12 @@ const ParkingDetail = () => {
               <DrawerPark />
             </div>
           </div>
-
-          <div className="flex-grow">
-            <img
-              src={parkingDtl?.image || ""}
-              alt="Parking Lot"
-              className=" w-full h-full object-cover rounded-lg border-2"
-              style={{ width: "500px", height: "200px" }}
-            />
+          <div className="px-4">
+            <h1>Parking Spots</h1>
+            <ParkingBox spots={parkingSpot?.spots || []} />
           </div>
           <MapDetail />
         </div>
-        {/* <div style={{ position: "absolute", top: "20%", right: "18%" }}>
-          <QRCodeComponent url={qrCodeUrl} />
-        </div> */}
       </div>
     </Suspense>
   );
