@@ -1,4 +1,4 @@
 ParkingLotID,URL,Location,Number of Spots,ROI,Address
-PL01,https://www.youtube.com/watch?v=HBDD3j5so0g,"49.00426480950375, -122.73464953172447",13,/home/ubuntu/spot-finder/notebooks/Yolo-V8/PL01.csv,"120 176 St, Surrey, BC V3S 9S2"
-PL02,https://www.youtube.com/watch?v=EPKWu223XEg,,23,/home/ubuntu/spot-finder/notebooks/Yolo-V8/PL02.csv,
-PL03,https://www.youtube.com/watch?v=kC6_JqEt3GA,"51.08961722612397, -115.35780639113904",5,/home/ubuntu/spot-finder/notebooks/Yolo-V8/PL03.csv,"630 8 St, Canmore, AB T1W 2B5"
+PL01,https://www.youtube.com/watch?v=HBDD3j5so0g,"49.00426480950375, -122.73464953172447",13,/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/PL01.csv,"120 176 St, Surrey, BC V3S 9S2"
+PL02,https://www.youtube.com/watch?v=EPKWu223XEg,,23,/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/PL02.csv,
+PL03,https://www.youtube.com/watch?v=kC6_JqEt3GA,"51.08961722612397, -115.35780639113904",5,/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/PL03.csv,"630 8 St, Canmore, AB T1W 2B5"
