@@ -4,9 +4,9 @@
 PROCESS_NAME="spotfinder-aws.py"
 
 # Define the full path to your script
-SCRIPT_PATH="/home/ubuntu/spot-finder/notebooks/Yolo-V8/spotfinder-aws.py"
+SCRIPT_PATH="/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/spotfinder-aws.py"
 
-LOG_FILE="/home/ubuntu/spot-finder/notebooks/Yolo-V8/logs/script_running.log"
+LOG_FILE="/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/logs/script_running.log"
 
 source /home/ubuntu/spot-finder/venv/bin/activate
 
