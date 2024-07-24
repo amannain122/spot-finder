@@ -122,5 +122,24 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = [
             'id', 'user', 'parking_id', 'parking_spot', 'parking_charge',
-            'parking_time', 'created_at', 'updated_at'
+            'parking_time', 'booking_status', 'created_at', 'updated_at'
         ]
+
+    def validate_parking_spot(self, value):
+        request = self.context['request']
+        if Booking.objects.filter(parking_spot=value, user=request.user).exists():
+            raise serializers.ValidationError(
+                "You have already booked this parking spot.")
+        return value
+
+    def validate_parking_time(self, value):
+        if value not in range(1, 9):
+            raise serializers.ValidationError(
+                "Parking time must be between 1 and 8 hours.")
+        return value
+
+    def create(self, validated_data):
+        request = self.context['request']
+        owner = request.user
+        validated_data['user'] = owner
+        return super().create(validated_data)
