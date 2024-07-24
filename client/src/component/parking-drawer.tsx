@@ -111,9 +111,17 @@ export function DrawerPark() {
             </div>
           </div>
           <DrawerFooter>
-            <Button>Confirm Selection</Button>
+            <Button aria-label="confirm selection" aria-live="polite">
+              Confirm Selection
+            </Button>
             <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button
+                aria-label="cancel selection"
+                aria-live="polite"
+                variant="outline"
+              >
+                Cancel
+              </Button>
             </DrawerClose>
           </DrawerFooter>
         </div>

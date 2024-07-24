@@ -196,6 +196,23 @@ const getParkingSpot = async () => {
   }
 };
 
+const getSingleParkingSpot = async (id: string) => {
+  const api = `${BASE_URL}/api/parkinglots/${id}/`;
+
+  try {
+    const response = await getData(api);
+    return {
+      status: "success",
+      data: response.data,
+    };
+  } catch (error) {
+    return {
+      status: "failure",
+      data: error,
+    };
+  }
+};
+
 export {
   login,
   register,
@@ -204,4 +221,5 @@ export {
   getJwtToken,
   getUser,
   getParkingSpot,
+  getSingleParkingSpot,
 };

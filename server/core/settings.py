@@ -28,13 +28,7 @@ if os.path.exists(env_file):
     environ.Env.read_env(env_file)
 else:
     print("Warning: .env file not found at", env_file)
-# Initialize environment variables
-# env = environ.Env()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-# BASE_DIR = Path(__file__).resolve().parent.parent
-
-# environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -42,11 +36,10 @@ else:
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -91,30 +84,12 @@ TEMPLATES = [
     },
 ]
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': env('DB_NAME'),
-#         'USER': env('superuser'),
-#         'PASSWORD': env('DB_PASSWORD'),
-#         'HOST': env('DB_HOST'),
-#         'PORT': env('DB_PORT'),
-#     }
-# }
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-    },
-    # 'default': {
-    #     'ENGINE': 'django_redshift_backend',
-    #     'NAME': 'dev',
-    #     'USER': 'awsuser',
-    #     'PASSWORD': 'Anjitha97',
-    #     'HOST': 'redshift-cluster-1.cqyedsmaziep.us-east-2.redshift.amazonaws.com',
-    #     'PORT': '5439',
-    # },
+    }
 }
 
 
