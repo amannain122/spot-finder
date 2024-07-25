@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Define the name of the process or script to check
-PROCESS_NAME="spotfinder-aws.py"
+PROCESS_NAME="main.py"
 
 # Define the full path to your script
-SCRIPT_PATH="/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/spotfinder-aws.py"
+SCRIPT_PATH="/home/ubuntu/spot-finder/main/main.py"
 
-LOG_FILE="/home/ubuntu/spot-finder/experimental/notebooks/Yolo-V8/logs/script_running.log"
+LOG_FILE="/home/ubuntu/spot-finder/logs/script_running.log"
 
 source /home/ubuntu/spot-finder/venv/bin/activate
 

@@ -3,8 +3,11 @@ from botocore.exceptions import NoCredentialsError
 from dotenv import load_dotenv
 import os
 
+import data_loader as dlu
+
+spot_finder_dir = dlu.find_spot_finder_dir()
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(os.path.join(spot_finder_dir, '.env'))
 
 # Constants for AWS region and S3 bucket name
 AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
