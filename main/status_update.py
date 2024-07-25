@@ -5,11 +5,12 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # Load environment variables from .env file
-root_dir = Path(__file__).resolve().parents[2]
+root_dir = Path(__file__).resolve().parents[1]
 dotenv_path = root_dir / '.env'
 load_dotenv(dotenv_path=dotenv_path)
 
-csv_path = '../src/data/parking_status.csv'
+# Define absolute file path and S3 details
+csv_path = str((root_dir / 'src' / 'data' / 'parking_status.csv').resolve())
 s3_bucket_name = 'spotfinder-data-bucket'
 role_arn = 'arn:aws:s3:::spotfinder-data-bucket/SampleAthena/parking_status/'
 
@@ -20,6 +21,12 @@ try:
         aws_secret_access_key=os.getenv('AWS_SECRET_KEY'),
         region_name='us-east-1'
     )
+
+    # Check if the CSV path exists
+    # Ensure os.path.exists() is called correctly
+    file_exists = os.path.exists(csv_path)
+    if not file_exists:
+        raise FileNotFoundError(f"The file {csv_path} does not exist")
 
     s3_client.upload_file(csv_path, s3_bucket_name, csv_path)
     print('reachedHere7')
