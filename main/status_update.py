@@ -2,8 +2,12 @@ import os
 import boto3
 from botocore.exceptions import NoCredentialsError
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+# Load environment variables from .env file
+root_dir = Path(__file__).resolve().parents[2]
+dotenv_path = root_dir / '.env'
+load_dotenv(dotenv_path=dotenv_path)
 
 csv_path = '../src/data/parking_status.csv'
 s3_bucket_name = 'spotfinder-data-bucket'
