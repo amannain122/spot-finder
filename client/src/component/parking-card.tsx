@@ -11,7 +11,6 @@ const ParkingLotCard = ({
   id,
 }: any) => {
   const router = useRouter();
- 
 
   return (
     <div
@@ -24,12 +23,12 @@ const ParkingLotCard = ({
         className="w-24 h-24 object-cover rounded-lg border-2"
       />
       <div className="ml-4">
-        <h3 className="text-sm font-semibold">{address}</h3>
-        <p className="text-gray-600 text-sm">{distance}</p>
+        <h3 className="text-sm font-semibold">{address || "Main Street"}</h3>
+
         <p className="text-gray-600 text-sm">Availability - {availability}</p>
       </div>
       <div className="ml-auto flex items-center">
-        <p className="text-sm font-semibold">{rating}</p>
+        <p className="text-sm font-semibold">{rating || 5}</p>
         <svg
           className="w-6 h-6 text-yellow-500 ml-1"
           xmlns="http://www.w3.org/2000/svg"
@@ -70,22 +69,23 @@ const parkingLots = [
   },
 ];
 
-export const ParkingList = () => {
+export const ParkingList = ({ parkingList }: any) => {
   return (
-    <div className="min-h-screen p-6">
-      {parkingLots.map((lot, index) => (
-        <ParkingLotCard
-          key={index}
-          image={lot.image}
-          address={lot.address}
-          distance={lot.distance}
-          availability={lot.availability}
-          rating={lot.rating}
-          id={lot.id}
-        />
-      ))}
+    <div className=" p-6">
+      {parkingList &&
+        parkingList?.map((lot: any, index: number) => (
+          <ParkingLotCard
+            key={index}
+            image={parkingLots[index]?.image}
+            address={lot.address || "Main Street"}
+            distance={lot.distance}
+            availability={lot.available_spots || "0"}
+            rating={lot.rating || 5}
+            id={lot?.parking_id || "PL01"}
+          />
+        ))}
     </div>
   );
 };
 
-export { ParkingLotCard };
+export { ParkingLotCard };

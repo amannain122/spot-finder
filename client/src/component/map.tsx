@@ -10,11 +10,9 @@ import Map, {
 } from "react-map-gl";
 import axios from "axios";
 import Pin from "../atoms/pins";
-
 import CITIES from "../data/mock-data.json";
 
-const TOKEN =
-  "pk.eyJ1IjoicHJha2FzaHB1bjIyIiwiYSI6ImNsdzUzd3J5cjFoaTQya242YTgzcXlvZncifQ.frgsDUb2l3D8ZolT50Ab1w"; // Set your mapbox token here
+const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN; // mapbox api token
 
 const locationIconUrl = "https://cdn0.iconfinder.com/data/icons/material-design-flat/24/location-256.png";
 
@@ -22,7 +20,12 @@ export const MapComponent = () => {
   const [popupInfo, setPopupInfo] = useState<any>(null);
   const [pointer, setPointer] = useState<any>();
   const [currentLocationMarker, setCurrentLocationMarker] = useState<any>(null);
+  const [userLocation, setUserLocation] = useState<{
+    longitude: number;
+    latitude: number;
+  } | null>(null);
 
+  console.log(userLocation);
   const pins = useMemo(
     () =>
       CITIES.map((city, index) => (
@@ -31,7 +34,7 @@ export const MapComponent = () => {
           longitude={city.longitude}
           latitude={city.latitude}
           anchor="bottom"
-          onClick={(e) => {
+          onClick={(e: any) => {
             e.originalEvent.stopPropagation();
             setPopupInfo(city);
           }}
@@ -63,6 +66,7 @@ export const MapComponent = () => {
       const placeName =
         response?.data?.features[0]?.properties?.full_address ||
         "Unknown location";
+      console.log(response?.data?.features[0]);
       setPointer({ lat: lngLat.lat, lng: lngLat.lng, address: placeName });
     } catch (error) {
       console.error("Error with reverse geocoding: ", error);
@@ -85,8 +89,21 @@ export const MapComponent = () => {
     );
   };
 
+
   useEffect(() => {
+    // Get the user's location
     showCurrentLocation();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { longitude, latitude } = position.coords;
+          setUserLocation({ longitude, latitude });
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+        }
+      );
+    }
   }, []);
 
   return (
@@ -124,8 +141,15 @@ export const MapComponent = () => {
             latitude={Number(popupInfo.latitude)}
             onClose={() => setPopupInfo(null)}
           >
-            <div>
-              {popupInfo.city}, {popupInfo.state} |{" "}
+            <div className="items-center p-2 bg-gray-50 rounded-lg shadow-md mb-4">
+              <h3 className="text-sm font-semibold">
+                {popupInfo.city}, {popupInfo.state}
+              </h3>
+              <div className="m-2">
+                <p className="text-gray-600 text-sm">1.2 KM</p>
+                <p className="text-gray-600 text-sm">Availability - 2</p>
+              </div>
+              <img width="100%" src={popupInfo.image} />
             </div>
             <img width="100%" src={popupInfo.image} alt={popupInfo.city} />
           </Popup>
