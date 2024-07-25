@@ -1,2 +1,6 @@
-ParkingLotID,Timestamp,SP1,SP2,SP3,SP4,SP5,SP6,SP7,SP8,SP9,SP10,SP11,SP12,SP13
-PL01,2024-07-24 17:06:07,empty,occupied,occupied,occupied,empty,empty,empty,empty,occupied,empty,empty,empty,empty
+ParkingLotID,Timestamp,SP1,SP2,SP3,SP4,SP5,SP6,SP7,SP8,SP9,SP10,SP11,SP12,SP13,SP14,SP15,SP16,SP17,SP18,SP19,SP20,SP21,SP22,SP23
+PL01,2024-07-25 01:56:02,empty,occupied,occupied,occupied,empty,empty,occupied,occupied,empty,empty,empty,empty,empty,,,,,,,,,,
+PL02,2024-07-25 01:06:21,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty
+ty,empty,,,,,,,,,,,,,,,,,,,,,,,
+PL03,2024-07-25 01:48:29,occupied,empty,empty,empty,empty,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,
