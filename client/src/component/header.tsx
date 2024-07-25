@@ -60,6 +60,12 @@ export function NavigationMenuDemo() {
                 About The Project, Teams Members
               </ListItem>
 
+              <ListItem href="/parking-qr" title="QR Codes">
+                Parking QR
+              </ListItem>
+              <ListItem href="/live-stream" title="Live Stream">
+                Live Stream of Parking Lots
+              </ListItem>
               <ListItem
                 href="/login"
                 title="Login"

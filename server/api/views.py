@@ -15,12 +15,16 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import ListCreateAPIView
+<<<<<<< HEAD
+from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView
+=======
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
+>>>>>>> 981a5d780608ce05eaf04efc7a2a2089f873c257
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingLotSerializer, BookingSerializer
 from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
-from .models import User, Booking
+from .models import User, Booking, CustomUser
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):
@@ -215,3 +219,53 @@ class BookingViewSet(ListCreateAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        id = self.request.user.id
+        return Booking.objects.filter(user=id)
+
+    def post(self, request, *args, **kwargs):
+        serializer = BookingSerializer(
+            data=request.data, context={"request": request})
+        if serializer.is_valid():
+            note = serializer.save()
+            if note:
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CancelBookingView(RetrieveUpdateAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        if instance.booking_status != 'booked':
+            return Response({'error': 'Booking can only be canceled if it is currently booked'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Set the status to 'canceled'
+        instance.booking_status = 'canceled'
+        instance.save()
+
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DeleteBookingView(DestroyAPIView):
+    queryset = Booking.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.booking_status in ['canceled', 'expired']:
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'error': 'Only canceled or expired bookings can be deleted'}, status=status.HTTP_400_BAD_REQUEST)
