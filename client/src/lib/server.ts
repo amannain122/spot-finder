@@ -180,7 +180,7 @@ export const handleError = (err: any, showToast = true) => {
 };
 
 const getParkingSpot = async () => {
-  const api = `${BASE_URL}/api/parking-status/`;
+  const api = `${BASE_URL}/api/parking-list/`;
 
   try {
     const response = await getData(api);
@@ -197,7 +197,7 @@ const getParkingSpot = async () => {
 };
 
 const getSingleParkingSpot = async (id: string) => {
-  const api = `${BASE_URL}/api/parkinglots/${id}/`;
+  const api = `${BASE_URL}/api/parking-status/${id}/`;
 
   try {
     const response = await getData(api);
