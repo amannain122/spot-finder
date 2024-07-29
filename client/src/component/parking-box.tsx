@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { Card } from "@/components/ui/card";
 
 const ParkingBox = ({ spots }: any) => {
   const [filteredSpots, setFilteredSpots] = React.useState(spots);
@@ -8,19 +7,21 @@ const ParkingBox = ({ spots }: any) => {
     const filteredSpots = spots.filter((spot: any) => spot?.status !== "");
     setFilteredSpots(filteredSpots);
   }, [spots]);
-  console.log(filteredSpots);
+
   return (
-    <div className="flex flex-wrap justify-center">
+    <div className="flex flex-wrap gap-4 justify-center">
       {filteredSpots?.map((spot: any) => (
-        <Card
-          key={spot.spot}
-          className={`w-16 h-16 m-2 text-gray-200  text-center flex items-center justify-center rounded-lg cursor-pointer ${
-            spot.status === "empty" ? "bg-green-500" : "bg-red-500"
+        <div
+          className={`cursor-pointer w-16 h-16 text-center flex items-center justify-center rounded-md  px-2 py-1 text-xs font-medium  ring-1 ring-inset  ${
+            spot.status === "empty"
+              ? "text-green-700 ring-green-600/20 bg-green-200"
+              : "bg-red-50 text-red-700 ring-red-600/20"
           }`}
         >
           {spot.spot}
-        </Card>
+        </div>
       ))}
+      s
     </div>
   );
 };

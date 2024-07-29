@@ -2,7 +2,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -18,7 +17,9 @@ export const MapDrawer = ({ parkingList }: any) => {
     <div>
       <Drawer>
         <DrawerTrigger className="rounded-md border underline">
-          View Parking Spots
+          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-[0.9rem] font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+            View Parking Spots
+          </span>
         </DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>

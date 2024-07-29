@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { ParkingDetail } from "@/component/parking-details";
 import { Separator } from "@/components/ui/separator";
-import { Header } from "@/component/header";
+import { Layout } from "@/component/layout";
 
 export const metadata: Metadata = {
   title: "Select-parking | Spot Finder",
@@ -10,12 +10,10 @@ export const metadata: Metadata = {
 
 const SelectParkingPage = () => {
   return (
-    <div className="p-width m-4 relative">
-      <Header />
+    <Layout>
       <ParkingDetail />
       <Separator />
-      {/* Add more content here as needed */}
-    </div>
+    </Layout>
   );
 };
 

@@ -67,7 +67,9 @@ export function ProfileForm() {
   return (
     <form className="">
       <div className="mb-4">
-        <Label htmlFor="firstName">First Name</Label>
+        <Label htmlFor="firstName">
+          First Name<span className="text-red-500">*</span>
+        </Label>
         <Input
           type="text"
           id="firstName"
@@ -77,7 +79,9 @@ export function ProfileForm() {
         />
       </div>
       <div className="mb-4">
-        <Label htmlFor="lastName">Last Name</Label>
+        <Label htmlFor="lastName">
+          Last Name<span className="text-red-500">*</span>
+        </Label>
         <Input
           type="text"
           required

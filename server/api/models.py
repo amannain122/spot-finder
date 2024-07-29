@@ -85,7 +85,6 @@ class Booking(models.Model):
         (7, '7 hours'),
         (8, '8 hours'),
     ]
-
     BOOKING_STATUS_CHOICES = [
         ('booked', 'Booked'),
         ('canceled', 'Canceled'),
@@ -95,8 +94,10 @@ class Booking(models.Model):
         CustomUser, on_delete=models.CASCADE, blank=True, null=True)
     parking_id = models.CharField(max_length=10, choices=PARKING_LOT_CHOICES)
     parking_spot = models.CharField(max_length=10, unique=True)
-    parking_charge = models.DecimalField(max_digits=10, decimal_places=2)
-    parking_time = models.DateTimeField(default=timezone.now)
+    parking_charge = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0)
+    parking_time = models.CharField(
+        max_length=10, choices=PARKING_TIME_CHOICES, default=1)
     booking_status = models.CharField(
         max_length=10, choices=BOOKING_STATUS_CHOICES, default='booked')
     created_at = models.DateTimeField(default=timezone.now)

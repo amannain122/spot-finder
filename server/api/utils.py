@@ -8,8 +8,8 @@ from botocore.exceptions import ClientError
 env = environ.Env()
 
 AWS_S3_REGION_NAME = 'us-east-1'
-AWS_ACCESS_KEY_ID = ""
-AWS_SECRET_ACCESS_KEY = ""
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
 
 METADATA = [
     {
