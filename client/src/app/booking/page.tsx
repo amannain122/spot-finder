@@ -1,6 +1,4 @@
 import React from "react";
-import { Separator } from "@/components/ui/separator";
-import { Layout } from "@/component/layout";
 import { MyBookings } from "./my-bookings";
 
 const BookingsPage: React.FC = () => {
@@ -9,7 +7,6 @@ const BookingsPage: React.FC = () => {
       <div>
         <h3 className="text-lg font-medium">My Bookings</h3>
       </div>
-      <Separator />
       <MyBookings />
     </div>
   );

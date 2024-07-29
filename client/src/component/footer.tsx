@@ -11,7 +11,7 @@ const Footer = () => {
           >
             <img src="logo.jpeg" className="h-8" alt="Flowbite Logo" />
             <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-              SpotFinder
+              Spot Finder
             </span>
           </a>
           <ul className="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400">
@@ -25,11 +25,6 @@ const Footer = () => {
                 QR Codes
               </a>
             </li>
-            <li>
-              <a href="/parking-qr" className="hover:underline me-4 md:me-6">
-                Privacy Policy
-              </a>
-            </li>
           </ul>
         </div>
         <hr className="mt-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
@@ -38,7 +33,7 @@ const Footer = () => {
           <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400">
             © 2024{" "}
             <a href="https://flowbite.com/" className="hover:underline">
-              SpotFinder™
+              Spot Finder™
             </a>
             . All Rights Reserved.
           </span>
@@ -97,7 +92,8 @@ const Footer = () => {
               <span className="sr-only">Twitter page</span>
             </a>
             <a
-              href="#"
+              href="https://github.com/amannain122/spot-finder"
+              target="_blank"
               className="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5"
             >
               <svg

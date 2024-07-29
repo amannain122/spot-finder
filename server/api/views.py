@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.middleware.csrf import get_token
 from rest_framework.response import Response
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView, ListAPIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework import serializers
 from rest_framework import permissions
 from rest_framework import status
-from .serializers import UserSerializer, MyTokenObtaionPairSerializer, BookingSerializer, ParkingLotSerializer
+from .serializers import UserSerializer, MyTokenObtaionPairSerializer, BookingSerializer, ParkingLotSerializer, AllBookingSerializer
 from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
 from .models import User, Booking
 
@@ -177,6 +177,11 @@ class BookingViewSet(ListCreateAPIView):
             if note:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BookingAPI(ListAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = AllBookingSerializer
 
 
 class CancelBookingView(RetrieveUpdateAPIView):

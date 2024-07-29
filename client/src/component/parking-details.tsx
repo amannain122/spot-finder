@@ -1,16 +1,18 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import QRCodeComponent from "@/component/QRCodeComponent";
 import React, { Suspense, useEffect, useState } from "react";
 import { MapDetail } from "./map-detail";
 import { DrawerPark } from "./parking-drawer";
-import { getSingleParkingSpot } from "@/lib/server";
-
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import {
+  confirmParkingSpot,
+  getSingleParkingSpot,
+  handleError,
+} from "@/lib/server";
 import { ParkingBox } from "./parking-box";
 import { SelectSeparator } from "@/components/ui/select";
+import { Loading } from "@/atoms/loading";
+import { useToast } from "@/components/ui/use-toast";
 
 const location = [
   {
@@ -25,8 +27,8 @@ const location = [
 
   {
     id: "PL02",
-    city: "Main Street",
-    address:
+    address: "Main Street",
+    image:
       "http://upload.wikimedia.org/wikipedia/commons/thumb/5/57/LA_Skyline_Mountains2.jpg/240px-LA_Skyline_Mountains2.jpg",
     state: "Toronto",
     latitude: 43.681482424186036,
@@ -43,42 +45,18 @@ const location = [
   },
 ];
 
-const Box = ({ position, color }: any) => (
-  <mesh position={position}>
-    <boxGeometry args={[1, 1, 1]} />
-    <meshStandardMaterial color={color} />
-  </mesh>
-);
-
-const BoxVisualization = () => {
-  const boxes = [
-    { position: [-2, 0.5, 0], color: "orange" },
-    { position: [0, 0.5, 0], color: "orange" },
-    { position: [2, 0.5, 0], color: "orange" },
-    { position: [0, 0.5, -2], color: "orange" },
-  ];
-
-  return (
-    <Canvas camera={{ position: [5, 5, 5], fov: 50 }}>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} />
-      {boxes.map((box, index) => (
-        <Box key={index} position={box.position} color={box.color} />
-      ))}
-      <OrbitControls />
-    </Canvas>
-  );
-};
-
 const ParkingDetail = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const search = searchParams.get("id");
   const [parkingSpot, setParkingSpot] = useState<any>([]);
+  const [loading, setLoading] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedSpot, setSelectedSpot] = useState<any>(null);
+  const [time, setTime] = useState(null);
+  const { toast } = useToast();
 
   const parking = location.find((parking) => parking.id === search);
-
-  console.log("sdf", parking);
 
   useEffect(() => {
     const getSpot = async () => {
@@ -87,13 +65,59 @@ const ParkingDetail = () => {
       if (response.status === "success") {
         setParkingSpot(response.data);
       }
+      setLoading(false);
     };
 
     getSpot();
   }, []);
 
-  const handleConfirmSelection = () => {
-    // router.push(`/qrconfirmation?id=${search}&address=${encodeURIComponent(parkingDtl.address)}&availability=${parkingDtl.availability}&rating=${parkingDtl.rating}`);
+  const onSpotClick = (spot: any) => {
+    if (spot.status === "occupied") {
+      toast({ title: "This spot is already occupied" });
+      return;
+    }
+    console.log(spot);
+    setSelectedSpot(spot);
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+    setSelectedSpot(null);
+  };
+
+  const handleConfirmSelection = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast({ title: "Please login first to confirm spot!!!" });
+      return;
+    }
+    if (!selectedSpot) {
+      toast({ title: "Please select a spot" });
+      return;
+    }
+    if (!time) {
+      toast({ title: "Please select time" });
+      return;
+    }
+    if (!search) {
+      toast({ title: "Invalid parking spot" });
+      return;
+    }
+
+    const response = await confirmParkingSpot({
+      parking_id: search,
+      parking_spot: selectedSpot.spot,
+      parking_time: time,
+    });
+
+    if (response.status === "success") {
+      toast({ title: "Parking spot confirmed" });
+      router.push(`/qrconfirmation?id=${search}`);
+    } else {
+      const error = handleError(response.data);
+      toast({ title: error || "Failed to confirm parking spot" });
+    }
   };
 
   return (
@@ -108,13 +132,30 @@ const ParkingDetail = () => {
               <div className="flex justify-between items-center mb-4">
                 Availability - {parkingSpot?.available_spots || "N/A"}
               </div>
-              <DrawerPark />
+              <DrawerPark
+                open={drawerOpen}
+                id={search}
+                selectedSpot={selectedSpot}
+                onClose={handleDrawerClose}
+                time={time}
+                setTime={setTime}
+                onConfirm={handleConfirmSelection}
+              />
               <SelectSeparator />
             </div>
           </div>
           <div className="px-4">
             <h1 className="font-medium pb-2">Parking Spots</h1>
-            <ParkingBox spots={parkingSpot?.spots || []} />
+            {loading ? (
+              <div className="text-center flex justify-center">
+                <Loading />
+              </div>
+            ) : (
+              <ParkingBox
+                onSpotClick={onSpotClick}
+                spots={parkingSpot?.spots || []}
+              />
+            )}
           </div>
           <MapDetail lat={parking?.latitude} lng={parking?.longitude} />
         </div>
