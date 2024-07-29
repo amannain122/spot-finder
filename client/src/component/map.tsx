@@ -14,12 +14,12 @@ import CITIES from "../data/mock-data.json";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN; // mapbox api token
 
+const locationIconUrl = "https://cdn0.iconfinder.com/data/icons/material-design-flat/24/location-256.png";
+
 export const MapComponent = () => {
   const [popupInfo, setPopupInfo] = useState<any>(null);
-  const [, setLng] = useState(-79.3323053);
-  const [, setLat] = useState(43.7535611);
-  const [, setZoom] = useState(9);
   const [pointer, setPointer] = useState<any>();
+  const [currentLocationMarker, setCurrentLocationMarker] = useState<any>(null);
   const [userLocation, setUserLocation] = useState<{
     longitude: number;
     latitude: number;
@@ -46,9 +46,7 @@ export const MapComponent = () => {
   );
 
   const onMarkerDrag = useCallback((event: any) => {
-    setLat(event?.viewState?.latitude.toFixed(4));
-    setLng(event.viewState.longitude.toFixed(4));
-    setZoom(event?.viewState?.zoom?.toFixed(2));
+    // Handle marker drag events if needed
   }, []);
 
   const handleClick = async (event: any) => {
@@ -75,8 +73,26 @@ export const MapComponent = () => {
     }
   };
 
+  const showCurrentLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log("Current location:", { latitude, longitude }); // Debugging line
+        setCurrentLocationMarker({
+          latitude,
+          longitude,
+        });
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+      }
+    );
+  };
+
+
   useEffect(() => {
     // Get the user's location
+    showCurrentLocation();
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -91,10 +107,7 @@ export const MapComponent = () => {
   }, []);
 
   return (
-    <div className="map-container rounded-sm">
-      {/* <div className="sidebar">
-        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
-      </div> */}
+    <div className="map-container" style={{ width: "100%", height: "100%" }}>
       <Map
         initialViewState={{
           latitude: 43.7535611,
@@ -103,18 +116,24 @@ export const MapComponent = () => {
           bearing: 0,
           pitch: 0,
         }}
+        style={{ width: "100%", height: "100%" }}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={TOKEN}
         onDrag={onMarkerDrag}
         onClick={handleClick}
       >
+        {/* Geolocate control */}
         <GeolocateControl position="top-left" />
+
+        {/* Other controls */}
         <FullscreenControl position="top-left" />
         <NavigationControl position="top-left" />
         <ScaleControl />
 
+        {/* Render markers */}
         {pins}
 
+        {/* Popup for city information */}
         {popupInfo && (
           <Popup
             anchor="top"
@@ -132,8 +151,11 @@ export const MapComponent = () => {
               </div>
               <img width="100%" src={popupInfo.image} />
             </div>
+            <img width="100%" src={popupInfo.image} alt={popupInfo.city} />
           </Popup>
         )}
+
+        {/* Popup for pointer location */}
         {pointer?.address && (
           <Popup
             anchor="top"
@@ -143,6 +165,17 @@ export const MapComponent = () => {
           >
             <div>{pointer?.address || ""}</div>
           </Popup>
+        )}
+
+        {/* Marker for current location */}
+        {currentLocationMarker && (
+          <Marker
+            latitude={currentLocationMarker.latitude}
+            longitude={currentLocationMarker.longitude}
+            anchor="bottom"
+          >
+            <img src={locationIconUrl} alt="Current Location" style={{ width: "60px", height: "60px" }} /> {/* Edited line */}
+          </Marker>
         )}
       </Map>
     </div>
