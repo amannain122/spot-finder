@@ -4,10 +4,10 @@ from ultralytics import YOLO
 import yt_dlp
 import pandas as pd
 from datetime import datetime
-from multiprocessing import Process
+from multiprocessing import Process, Lock
 
 # Function to process each parking lot
-def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path):
+def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path, lock):
     # Load the YOLO model
     model = YOLO('../src/models/yolov8n.pt')
 
@@ -100,26 +100,27 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             row = [parking_lot_id, timestamp] + bounding_boxes_status
 
-            # Read existing data
-            try:
-                df = pd.read_csv(output_csv_path)
-                if parking_lot_id in df['ParkingLotID'].values:
-                    # Find the index of the parking lot and update the row
-                    index = df[df['ParkingLotID'] == parking_lot_id].index[0]
-                    # Update only the status columns and timestamp
-                    for i in range(len(bounding_boxes_status)):
-                        df.loc[index, f'SP{i + 1}'] = bounding_boxes_status[i]
-                    df.loc[index, 'Timestamp'] = timestamp
-                else:
-                    # Create a new row with correct columns
-                    new_df = pd.DataFrame([row], columns=['ParkingLotID', 'Timestamp'] + [f'SP{i + 1}' for i in range(len(bounding_box_areas))])
-                    df = pd.concat([df, new_df], ignore_index=True)
-            except FileNotFoundError:
-                # Create a new DataFrame if the file doesn't exist
-                df = pd.DataFrame([row], columns=['ParkingLotID', 'Timestamp'] + [f'SP{i + 1}' for i in range(len(bounding_box_areas))])
+            # Use a lock to ensure no other process writes to the CSV file simultaneously
+            with lock:
+                try:
+                    df = pd.read_csv(output_csv_path)
+                    if parking_lot_id in df['ParkingLotID'].values:
+                        # Find the index of the parking lot and update the row
+                        index = df[df['ParkingLotID'] == parking_lot_id].index[0]
+                        # Update only the status columns and timestamp
+                        for i in range(len(bounding_boxes_status)):
+                            df.loc[index, f'SP{i + 1}'] = bounding_boxes_status[i]
+                        df.loc[index, 'Timestamp'] = timestamp
+                    else:
+                        # Create a new row with correct columns
+                        new_df = pd.DataFrame([row], columns=['ParkingLotID', 'Timestamp'] + [f'SP{i + 1}' for i in range(len(bounding_box_areas))])
+                        df = pd.concat([df, new_df], ignore_index=True)
+                except FileNotFoundError:
+                    # Create a new DataFrame if the file doesn't exist
+                    df = pd.DataFrame([row], columns=['ParkingLotID', 'Timestamp'] + [f'SP{i + 1}' for i in range(len(bounding_box_areas))])
 
-            # Write the DataFrame back to the CSV file
-            df.to_csv(output_csv_path, index=False)
+                # Write the DataFrame back to the CSV file
+                df.to_csv(output_csv_path, index=False)
 
             prev_empty_boxes = empty_boxes
 
@@ -132,7 +133,6 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
     cap.release()
     cv2.destroyAllWindows()
 
-
 # Main function to read the parking_lots.csv and start processes
 def main():
     parking_lots_csv_path = '../src/data/parking_lots.csv'
@@ -142,6 +142,7 @@ def main():
     parking_lots_data = pd.read_csv(parking_lots_csv_path)
 
     processes = []
+    lock = Lock()
 
     # Start a process for each parking lot
     for index, lot in parking_lots_data.iterrows():
@@ -149,14 +150,13 @@ def main():
         video_url = lot['URL']
         roi_csv_path = lot['ROI']
 
-        p = Process(target=process_parking_lot, args=(parking_lot_id, video_url, roi_csv_path, output_csv_path))
+        p = Process(target=process_parking_lot, args=(parking_lot_id, video_url, roi_csv_path, output_csv_path, lock))
         p.start()
         processes.append(p)
 
     # Ensure all processes complete
     for p in processes:
         p.join()
-
 
 if __name__ == '__main__':
     main()
