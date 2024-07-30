@@ -22,9 +22,18 @@ from django.core.cache import cache
 
 from cryptography.fernet import Fernet, InvalidToken
 from rest_framework.permissions import IsAuthenticated
+<<<<<<< HEAD
 from rest_framework.response import Response
 from rest_framework import status
 import core.settings as set
+=======
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingLotSerializer, BookingSerializer
+from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
+from .models import User, Booking, CustomUser
+>>>>>>> 261ed3d (fixed minor error)
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):

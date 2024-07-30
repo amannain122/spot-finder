@@ -1,5 +1,10 @@
 from django.urls import path
+<<<<<<< HEAD
 from .views import UserView, TokenObtainView, ParkingListView, ParkingLotView, BookingViewSet, CancelBookingView, DeleteBookingView, BookingAPI
+=======
+from .views import PostList, PostDetail, UserView, TokenObtainView, ParkingStatusView, ParkingLotView, BookingViewSet
+from .views import PostList, PostDetail, UserView, TokenObtainView, ParkingStatusView, ParkingLotView, BookingViewSet, CancelBookingView, DeleteBookingView
+>>>>>>> 261ed3d (fixed minor error)
 
 app_name = 'spotFinder'
 
@@ -14,5 +19,5 @@ urlpatterns = [
     path('bookings/<int:pk>/cancel/',
          CancelBookingView.as_view(), name='cancel-booking'),
     path('bookings/<int:pk>/delete/',
-         DeleteBookingView.as_view(), name='delete-booking'),
+         DeleteBookingView.as_view(), name='delete-booking')
 ]
