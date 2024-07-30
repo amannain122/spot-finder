@@ -60,6 +60,12 @@ export function NavigationMenuDemo() {
                 About The Project, Teams Members
               </ListItem>
 
+              <ListItem href="/parking-qr" title="QR Codes">
+                Parking QR
+              </ListItem>
+              <ListItem href="/live-stream" title="Live Stream">
+                Live Stream of Parking Lots
+              </ListItem>
               <ListItem
                 href="/login"
                 title="Login"
@@ -124,9 +130,11 @@ export const Header = () => {
     router.push("/profile");
   };
   return (
-    <div className="flex items-center h-16 justify-between">
+    <div className="flex items-center h-16 justify-between border-b-2">
       <div className="flex items-center">
-        <img src="/logo.jpeg" className="w-12 mr-6" />
+        <a href="/">
+          <img src="/logo.jpeg" className="w-12 mr-6" />
+        </a>
         <NavigationMenuDemo />
       </div>
       <div className="flex justify-center items-center gap-4">
@@ -159,13 +167,21 @@ export const Header = () => {
         ) : (
           <div className="hidden lg:block md:block">
             <Link href="/login">
-              <button className="bg-gray-100 text-black py-2 px-4 mr-2 rounded-sm">
+              <button
+                aria-label="Login"
+                aria-live="polite"
+                className="bg-gray-100 text-black py-2 px-4 mr-2 rounded-sm"
+              >
                 Login
               </button>
             </Link>
 
             <Link className="" href="/register">
-              <button className="bg-green-300 text-black py-2 px-4 rounded-sm">
+              <button
+                aria-label="Register"
+                aria-live="polite"
+                className="bg-green-300 text-black py-2 px-4 rounded-sm"
+              >
                 Register
               </button>
             </Link>

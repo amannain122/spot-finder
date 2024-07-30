@@ -14,18 +14,22 @@ import CITIES from "../data/mock-data.json";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN; // mapbox api token
 
-export const MapComponent = () => {
+const locationIconUrl =
+  "https://cdn0.iconfinder.com/data/icons/material-design-flat/24/location-256.png";
+
+export const MapComponent = ({
+  selectedLocation,
+  viewPort,
+  setViewport,
+}: any) => {
   const [popupInfo, setPopupInfo] = useState<any>(null);
-  const [, setLng] = useState(-79.3323053);
-  const [, setLat] = useState(43.7535611);
-  const [, setZoom] = useState(9);
   const [pointer, setPointer] = useState<any>();
+  const [currentLocationMarker, setCurrentLocationMarker] = useState<any>(null);
   const [userLocation, setUserLocation] = useState<{
     longitude: number;
     latitude: number;
   } | null>(null);
 
-  console.log(userLocation);
   const pins = useMemo(
     () =>
       CITIES.map((city, index) => (
@@ -34,7 +38,7 @@ export const MapComponent = () => {
           longitude={city.longitude}
           latitude={city.latitude}
           anchor="bottom"
-          onClick={(e) => {
+          onClick={(e: any) => {
             e.originalEvent.stopPropagation();
             setPopupInfo(city);
           }}
@@ -46,9 +50,10 @@ export const MapComponent = () => {
   );
 
   const onMarkerDrag = useCallback((event: any) => {
-    setLat(event?.viewState?.latitude.toFixed(4));
-    setLng(event.viewState.longitude.toFixed(4));
-    setZoom(event?.viewState?.zoom?.toFixed(2));
+    setViewport({
+      latitude: event?.viewState?.latitude || 43.7535611,
+      longitude: event.viewState?.longitude || -79.3323053,
+    });
   }, []);
 
   const handleClick = async (event: any) => {
@@ -68,15 +73,31 @@ export const MapComponent = () => {
       const placeName =
         response?.data?.features[0]?.properties?.full_address ||
         "Unknown location";
-      console.log(response?.data?.features[0]);
       setPointer({ lat: lngLat.lat, lng: lngLat.lng, address: placeName });
     } catch (error) {
       console.error("Error with reverse geocoding: ", error);
     }
   };
 
+  const showCurrentLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log("Current location:", { latitude, longitude }); // Debugging line
+        setCurrentLocationMarker({
+          latitude,
+          longitude,
+        });
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+      }
+    );
+  };
+
   useEffect(() => {
     // Get the user's location
+    showCurrentLocation();
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -91,29 +112,56 @@ export const MapComponent = () => {
   }, []);
 
   return (
-    <div className="map-container rounded-sm">
-      {/* <div className="sidebar">
-        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
-      </div> */}
+    <div className="map-container">
       <Map
         initialViewState={{
-          latitude: 43.7535611,
-          longitude: -79.3323053,
+          latitude: selectedLocation?.latitude || 43.7535611,
+          longitude: selectedLocation?.longitude || -79.3323053,
           zoom: 10,
           bearing: 0,
           pitch: 0,
         }}
+        {...viewPort}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={TOKEN}
         onDrag={onMarkerDrag}
         onClick={handleClick}
+        // onMove={setViewport}
       >
         <GeolocateControl position="top-left" />
         <FullscreenControl position="top-left" />
         <NavigationControl position="top-left" />
         <ScaleControl />
 
-        {pins}
+        {/* {pins} */}
+
+        {selectedLocation?.city && (
+          <Marker
+            latitude={selectedLocation.latitude}
+            longitude={selectedLocation.longitude}
+          >
+            <div style={{ color: "red", transform: "translate(-50%, -50%)" }}>
+              <Pin />
+            </div>
+            <Popup
+              latitude={selectedLocation.latitude}
+              longitude={selectedLocation.longitude}
+              closeButton={true}
+              closeOnClick={false}
+              anchor="top"
+            >
+              <div>
+                <p>{selectedLocation.city}</p>
+                <p>{selectedLocation.state}</p>
+                <img
+                  src={selectedLocation.image}
+                  alt={selectedLocation.city}
+                  style={{ width: "100px" }}
+                />
+              </div>
+            </Popup>
+          </Marker>
+        )}
 
         {popupInfo && (
           <Popup
@@ -134,6 +182,7 @@ export const MapComponent = () => {
             </div>
           </Popup>
         )}
+
         {pointer?.address && (
           <Popup
             anchor="top"
@@ -143,6 +192,21 @@ export const MapComponent = () => {
           >
             <div>{pointer?.address || ""}</div>
           </Popup>
+        )}
+
+        {/* Marker for current location */}
+        {currentLocationMarker && (
+          <Marker
+            latitude={currentLocationMarker.latitude}
+            longitude={currentLocationMarker.longitude}
+            anchor="bottom"
+          >
+            <img
+              src={locationIconUrl}
+              alt="Current Location"
+              style={{ width: "60px", height: "60px" }}
+            />{" "}
+          </Marker>
         )}
       </Map>
     </div>

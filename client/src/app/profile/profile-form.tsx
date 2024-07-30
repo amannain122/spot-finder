@@ -67,7 +67,9 @@ export function ProfileForm() {
   return (
     <form className="">
       <div className="mb-4">
-        <Label htmlFor="firstName">First Name</Label>
+        <Label htmlFor="firstName">
+          First Name<span className="text-red-500">*</span>
+        </Label>
         <Input
           type="text"
           id="firstName"
@@ -77,7 +79,9 @@ export function ProfileForm() {
         />
       </div>
       <div className="mb-4">
-        <Label htmlFor="lastName">Last Name</Label>
+        <Label htmlFor="lastName">
+          Last Name<span className="text-red-500">*</span>
+        </Label>
         <Input
           type="text"
           required
@@ -89,7 +93,13 @@ export function ProfileForm() {
         <Label htmlFor="email">Email</Label>
         <Input disabled type="email" id="email" required value={data.email} />
       </div>
-      <Button type="submit" onClick={(e) => handleUpdate(e)} disabled={loading}>
+      <Button
+        aria-label="Update profile"
+        aria-live="polite"
+        type="submit"
+        onClick={(e) => handleUpdate(e)}
+        disabled={loading}
+      >
         {loading ? "Updating..." : "Update Profile"}
       </Button>
     </form>

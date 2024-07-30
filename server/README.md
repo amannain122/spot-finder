@@ -1,4 +1,8 @@
-# Spot Finder Server
+# Spot Finder Server / Backend
+
+## Tech Stack
+
+- Django, Django Rest Framework
 
 ## To Run the application
 
@@ -10,6 +14,7 @@ pip install -r requirements.txt
 
 ```bash
 python manage.py makemigrations
+python manage.py makemigrations api
 python manage.py migrate
 python manage.py runserver
 ```

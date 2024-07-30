@@ -8,8 +8,8 @@ from botocore.exceptions import ClientError
 env = environ.Env()
 
 AWS_S3_REGION_NAME = 'us-east-1'
-AWS_ACCESS_KEY_ID = ""
-AWS_SECRET_ACCESS_KEY = ""
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
 
 METADATA = [
     {
@@ -44,6 +44,11 @@ athena_client = boto3.client(
     aws_access_key_id=AWS_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
 )
+
+
+query = "SELECT * FROM athena_spot_finder.parking_lots;"
+database = "sample_db"
+output_location = "s3://spotfinder-data-bucket/Athena_output/"
 
 
 def query_athena(query, database, output_location):
@@ -83,11 +88,6 @@ def get_query_results(query_execution_id):
     else:
         raise Exception(
             f"Query failed or was cancelled. Final status: {status}")
-
-
-query = "SELECT * FROM athena_spot_finder.parking_lots;"
-database = "sample_db"
-output_location = "s3://spotfinder-data-bucket/Athena_output/"
 
 
 def results_to_dataframe(results):

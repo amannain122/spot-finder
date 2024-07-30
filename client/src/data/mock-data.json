@@ -1,16 +1,24 @@
 [
   {
-    "city": "345 Carlaw - Lot #492",
+    "city": "120 176 St, Surrey, BC V3S 9S2, Canada",
     "image": "http://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Above_Gotham.jpg/240px-Above_Gotham.jpg",
-    "state": "Toronto",
-    "latitude": 43.667247122220644,
-    "longitude": -79.34225836716911
+    "state": "British Columbia",
+    "latitude": 49.00426480950375,
+    "longitude": -122.73464953172447
   },
+
   {
-    "city": "47 Eaton Ave Parking",
+    "city": "Main Street",
     "image": "http://upload.wikimedia.org/wikipedia/commons/thumb/5/57/LA_Skyline_Mountains2.jpg/240px-LA_Skyline_Mountains2.jpg",
     "state": "Toronto",
     "latitude": 43.681482424186036,
     "longitude": -79.34282393314058
+  },
+  {
+    "city": "630 8 St, Canmore, AB T1W 2B5, Canada",
+    "image": "http://upload.wikimedia.org/wikipedia/commons/thumb/5/57/LA_Skyline_Mountains2.jpg/240px-LA_Skyline_Mountains2.jpg",
+    "state": "Alberta",
+    "latitude": 51.08961722612397,
+    "longitude": -115.35780639113904
   }
 ]
