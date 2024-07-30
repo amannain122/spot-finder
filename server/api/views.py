@@ -20,6 +20,12 @@ from rest_framework import status, permissions
 from .serializers import ParkingLotSerializer
 from django.core.cache import cache
 
+from cryptography.fernet import Fernet, InvalidToken
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+import core.settings as set
+
 
 class IsAdminOrUserPermission(permissions.BasePermission):
 
@@ -205,9 +211,40 @@ class BookingViewSet(ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+SECRET_KEY = set.TOKEN
+
+
+def decode_token(token):
+
+    fernet = Fernet('M9DnB3o1h1ccm1VICXMkbF2wuPtjYrdFJTSqr3Pwv7A=')
+    try:
+        decoded = fernet.decrypt(token)
+        return decoded.decode()
+    except InvalidToken:
+        return None
+
+
 class BookingAPI(ListAPIView):
     queryset = Booking.objects.all()
     serializer_class = AllBookingSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def list(self, request, *args, **kwargs):
+        token = request.headers.get('Authorization')
+
+        if not token:
+            return Response({"error": "Token missing"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        decoded_token = decode_token(
+            'M9DnB3o1h1ccm1VICXMkbF2wuPtjYrdFJTSqr3Pwv7A=')
+
+        if not decoded_token:
+            return Response({"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # If token is valid, proceed with the usual response
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class CancelBookingView(RetrieveUpdateAPIView):
