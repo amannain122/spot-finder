@@ -7,7 +7,7 @@ const parkingIconUrl =
   "https://cdn1.iconfinder.com/data/icons/city-elements-56/520/416_Car_Parking_Transport-512.png";
 
 export const MyBookings = () => {
-  const [bookings, setBookings] = useState([]);
+  const [bookings, setBookings] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const [cancelBookingId, setCancelBookingId] = useState<number | null>(null);
 
@@ -27,8 +27,15 @@ export const MyBookings = () => {
     fetchBookings();
   }, []);
 
-  const handleCancelClick = (id: number) => {
-    setCancelBookingId(id);
+  const handleCancelClick = (booking: any) => {
+    if (
+      booking.booking_status === "canceled" ||
+      booking.booking_status === "expired"
+    ) {
+      return;
+    }
+
+    setCancelBookingId(booking.id);
   };
 
   const handleConfirmCancel = async () => {
@@ -36,15 +43,24 @@ export const MyBookings = () => {
       try {
         // Call backend API to cancel the booking
         const token = localStorage.getItem("token");
-        await fetch(`http://127.0.0.1:8000/api/bookings/${cancelBookingId}/cancel/`, {
-          method: "PATCH",
-          headers: {
-            Authorization: `JWT ${token}`,
-          },
-        });
+        await fetch(
+          `http://127.0.0.1:8000/api/bookings/${cancelBookingId}/cancel/`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          }
+        );
 
         // Update the bookings state to remove the cancelled booking
-        setBookings(bookings.filter((booking:any) => booking.id !== cancelBookingId));
+        const updatedBookings = bookings.map((booking: any) => {
+          if (booking.id === cancelBookingId) {
+            booking.booking_status = "cancelled";
+          }
+          return booking;
+        });
+        setBookings(updatedBookings);
       } catch (error) {
         console.error("Failed to cancel booking", error);
       } finally {
@@ -141,7 +157,7 @@ export const MyBookings = () => {
               </td>
             </tr>
           ) : (
-            bookings.map((booking: any, index) => (
+            bookings.map((booking: any, index: number) => (
               <tr key={booking.id || index}>
                 <td
                   style={{
@@ -190,12 +206,15 @@ export const MyBookings = () => {
                 >
                   <button
                     className={`bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ${
-                      booking.booking_status === "cancelled"
+                      booking.booking_status === "canceled"
                         ? "cursor-not-allowed opacity-50"
                         : ""
                     }`}
-                    onClick={() => handleCancelClick(booking.id)}
-                    disabled={booking.booking_status === "cancelled"}
+                    onClick={() => handleCancelClick(booking)}
+                    disabled={booking?.booking_status?.includes([
+                      "canceled",
+                      "expired",
+                    ])}
                   >
                     Cancel
                   </button>
