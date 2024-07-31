@@ -2,35 +2,26 @@
 from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.middleware.csrf import get_token
+from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView, ListAPIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
+from rest_framework import status, permissions
 from rest_framework import serializers
 from rest_framework import permissions
 from rest_framework import status
+from cryptography.fernet import Fernet, InvalidToken
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, BookingSerializer, ParkingLotSerializer, AllBookingSerializer
 from .utils import METADATA, query_athena, get_query_results, results_to_dataframe, merge_data
 from .models import User, Booking
 from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
 from .serializers import ParkingLotSerializer
-from django.core.cache import cache
-
-from cryptography.fernet import Fernet, InvalidToken
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
 import core.settings as set
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingLotSerializer, BookingSerializer
-from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
-from .models import User, Booking, CustomUser
+import environ
+
+env = environ.Env()
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):
@@ -103,22 +94,6 @@ class UserView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class ParkingListView(APIView):
-#     permission_classes = [permissions.AllowAny]
-
-#     def get(self, request):
-#         query = "SELECT * FROM athena_spot_finder.parking_lots;"
-#         database = "sample_db"
-#         output_location = "s3://spotfinder-data-bucket/Athena_output/"
-#         query_execution_id = query_athena(query, database, output_location)
-#         results = get_query_results(query_execution_id)
-
-#         spots_data = results_to_dataframe(results)
-#         data = merge_data(METADATA, spots_data)
-#         serializer = ParkingLotSerializer(data, many=True)
-#         return Response(serializer.data)
 
 
 class ParkingListView(APIView):
@@ -229,14 +204,12 @@ class BookingViewSet(ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-SECRET_KEY = set.TOKEN
-
-
 def decode_token(token):
+    key = bytes(env("CRYPTO_KEY"), 'utf-8')
+    fernet = Fernet(key)
 
-    fernet = Fernet('M9DnB3o1h1ccm1VICXMkbF2wuPtjYrdFJTSqr3Pwv7A=')
     try:
-        decoded = fernet.decrypt(token)
+        decoded = fernet.decrypt(bytes(token, 'utf-8'))
         return decoded.decode()
     except InvalidToken:
         return None
@@ -253,8 +226,7 @@ class BookingAPI(ListAPIView):
         if not token:
             return Response({"error": "Token missing"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        decoded_token = decode_token(
-            'M9DnB3o1h1ccm1VICXMkbF2wuPtjYrdFJTSqr3Pwv7A=')
+        decoded_token = decode_token(token)
 
         if not decoded_token:
             return Response({"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)

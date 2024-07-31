@@ -1,10 +1,5 @@
 from django.urls import path
-<<<<<<< HEAD
 from .views import UserView, TokenObtainView, ParkingListView, ParkingLotView, BookingViewSet, CancelBookingView, DeleteBookingView, BookingAPI
-=======
-from .views import PostList, PostDetail, UserView, TokenObtainView, ParkingStatusView, ParkingLotView, BookingViewSet
-from .views import PostList, PostDetail, UserView, TokenObtainView, ParkingStatusView, ParkingLotView, BookingViewSet, CancelBookingView, DeleteBookingView
->>>>>>> 261ed3d (fixed minor error)
 
 app_name = 'spotFinder'
 
