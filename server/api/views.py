@@ -22,18 +22,15 @@ from django.core.cache import cache
 
 from cryptography.fernet import Fernet, InvalidToken
 from rest_framework.permissions import IsAuthenticated
-<<<<<<< HEAD
 from rest_framework.response import Response
 from rest_framework import status
 import core.settings as set
-=======
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingLotSerializer, BookingSerializer
 from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
 from .models import User, Booking, CustomUser
->>>>>>> 261ed3d (fixed minor error)
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):
@@ -214,6 +211,14 @@ class BookingViewSet(ListCreateAPIView):
         serializer = BookingSerializer(
             data=request.data, context={"request": request})
         if serializer.is_valid():
+            # Check if the user has already booked the spot
+            if Booking.objects.filter(user=request.user, booking_status='booked').exists():
+                return Response({"detail": "You have already booked a parking spot."}, status=status.HTTP_400_BAD_REQUEST)
+
+             # Check if the parking spot is already booked
+            if Booking.objects.filter(parking_spot=request.parking_spot, booking_status='booked').exists():
+                return Response({"detail": "This parking spot is already booked. Please choose another spot."}, status=status.HTTP_400_BAD_REQUEST)
+
             note = serializer.save()
             if note:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
