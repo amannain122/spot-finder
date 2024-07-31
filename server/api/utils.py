@@ -216,39 +216,65 @@ async def get_query_results(query_execution_id):
                 f"Query failed or was cancelled. Final status: {status}")
 
 
-def results_to_dataframe(results):
-    rows = results['ResultSet']['Rows']
-    columns = [col['VarCharValue'] for col in rows[0]['Data']]
-    data = [[col['VarCharValue'] for col in row['Data']] for row in rows[1:]]
-    df = pd.DataFrame(data, columns=columns)
-    df.to_csv('out.csv', index=False)
+def results_to_dataframe(athena_response):
+    # Step 1: Extract column names
+    columns = [col['VarCharValue']
+               for col in athena_response['ResultSet']['Rows'][0]['Data']]
 
-    file_path = 'out.csv'
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
+    # Step 2: Extract data rows
+    rows = [
+        [data['VarCharValue'] if 'VarCharValue' in data else None for data in row['Data']]
+        for row in athena_response['ResultSet']['Rows'][1:]
+    ]
 
-    # Extracting header and data rows
-    data_rows = [line.strip().split(',') for line in lines[1:]]
+    # Step 3: Convert to DataFrame
+    df = pd.DataFrame(rows, columns=columns)
 
-    # Manually fixing the header and data rows
-    fixed_header = ['ParkingLotID', 'Timestamp', 'SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'SP6', 'SP7',
-                    'SP8', 'SP9', 'SP10', 'SP11', 'SP12', 'SP13', 'SP14', 'SP15', 'SP16', 'SP17',
-                    'SP18', 'SP19', 'SP20', 'SP21', 'SP22', 'SP23']
+    df.columns = df.iloc[0]  # Set the first row as header
+    df = df[1:]  # Remove the first row from the data
 
-    # Filtering the data rows to ensure correct length and structure
-    corrected_data_rows = [
-        row for row in data_rows if len(row) == len(fixed_header)]
-
-    # Creating the DataFrame with corrected header and data rows
-    corrected_data = pd.DataFrame(corrected_data_rows, columns=fixed_header)
-
-    # Stripping extraneous quotes and spaces from the data entries
-    corrected_data = corrected_data.map(lambda x: x.strip().strip('"'))
-
-    # Removing the first row which contains the column headers instead of actual data
-    corrected_data = corrected_data.iloc[1:].reset_index(drop=True)
-
-    # Converting the cleaned DataFrame to an array of objects (list of dictionaries)
-    array_of_objects = corrected_data.to_dict(orient='records')
+    array_of_objects = df.to_dict(orient='records')
 
     return array_of_objects
+
+
+def merge_data(metadata, athena_data):
+
+    data = athena_data
+
+    # Iterate through the metadata and match it with the data
+    parking_lots = []
+    for idx, lot in enumerate(metadata):
+        lot_spots = [row for row in data if row["ParkingLotID"]
+                     == lot["ParkingLotID"]]
+
+        if lot_spots:
+            # Assuming that spot columns are named SP1, SP2,...SP23
+            spots_list = [{"spot": f"SP{i+1}", "status": lot_spots[0].get(f"SP{i+1}", "empty")}
+                          for i in range(23)]
+
+            # Parse coordinates if available
+            coordinates = {"latitude": 0.0, "longitude": 0.0}
+            if lot["Location"]:
+                lat, lon = map(float, lot["Location"].split(","))
+                coordinates = {"latitude": lat, "longitude": lon}
+
+            # Calculate total, available, and reserved spots
+            total_spots = lot["Number of Spots"]
+            available_spots = sum(
+                1 for spot in spots_list if spot["status"] == "empty")
+            reserved_spots = total_spots - available_spots
+
+            # Build the parking lot dictionary
+            parking_lots.append({
+                "id": idx + 1,
+                "parking_id": lot["ParkingLotID"],
+                "coordinates": coordinates,
+                "total_spots": total_spots,
+                "available_spots": available_spots,
+                "reserved_spots": reserved_spots,
+                "address": lot["Address"],
+                "image": lot["URL"],
+                "spots": spots_list
+            })
+    return parking_lots

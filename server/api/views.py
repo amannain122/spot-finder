@@ -1,5 +1,4 @@
 
-from .utils import query_athena, get_query_results, results_to_dataframe
 from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.middleware.csrf import get_token
@@ -13,12 +12,11 @@ from rest_framework import serializers
 from rest_framework import permissions
 from rest_framework import status
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, BookingSerializer, ParkingLotSerializer, AllBookingSerializer
-from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
+from .utils import METADATA, query_athena, get_query_results, results_to_dataframe, merge_data
 from .models import User, Booking
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from .utils import query_athena, get_query_results, results_to_dataframe
 from .serializers import ParkingLotSerializer
 from django.core.cache import cache
 
@@ -95,35 +93,6 @@ class UserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def merge_data(metadata, spots):
-    parking_lots = []
-    for idx, lot in enumerate(metadata):
-        lot_spots = [spot for spot in spots if spot["ParkingLotID"]
-                     == lot["ParkingLotID"]]
-        spots_list = [{"spot": f"SP{i}", "status": lot_spots[0].get(
-            f"SP{i}", "empty")} for i in range(1, 24)]
-        coordinates = {"latitude": 0.0, "longitude": 0.0}
-        if lot["Location"]:
-            lat, lon = map(float, lot["Location"].split(","))
-            coordinates = {"latitude": lat, "longitude": lon}
-        total_spots = lot["Number of Spots"]
-        available_spots = sum(
-            1 for spot in spots_list if spot["status"] == "empty")
-        reserved_spots = total_spots - available_spots
-        parking_lots.append({
-            "id": idx + 1,
-            "parking_id": lot["ParkingLotID"],
-            "coordinates": coordinates,
-            "total_spots": total_spots,
-            "available_spots": available_spots,
-            "reserved_spots": reserved_spots,
-            "address": lot["Address"],
-            "image": lot["URL"],
-            "spots": spots_list
-        })
-    return parking_lots
-
-
 # class ParkingListView(APIView):
 #     permission_classes = [permissions.AllowAny]
 
@@ -152,8 +121,8 @@ class ParkingListView(APIView):
             return Response(cached_data)
 
         # Convert async function calls to sync using async_to_sync
-        query = "SELECT * FROM athena_spot_finder.parking_lots;"
-        database = "sample_db"
+        query = 'SELECT * FROM "AwsDataCatalog"."spotfinder-schema"."parking_list_lots"'
+        database = 'spotfinder-schema'
         output_location = "s3://spotfinder-data-bucket/Athena_output/"
 
         query_execution_id = async_to_sync(query_athena)(
@@ -161,6 +130,7 @@ class ParkingListView(APIView):
         results = async_to_sync(get_query_results)(query_execution_id)
 
         spots_data = results_to_dataframe(results)
+
         data = merge_data(METADATA, spots_data)
         serializer = ParkingLotSerializer(data, many=True)
 
@@ -174,13 +144,31 @@ class ParkingLotView(APIView):
     PARKING_LOT_CHOICES = ['PL01', 'PL02', 'PL03']
 
     def get(self, request, parking_lot_id=None):
+        cache_key = 'parking_status_lots_data'
+
         if parking_lot_id and parking_lot_id.upper() not in self.PARKING_LOT_CHOICES:
             return Response({"error": "Parking Detail Not Found"}, status=status.HTTP_400_BAD_REQUEST)
-        query = "SELECT * FROM athena_spot_finder.parking_lots;"
-        database = "sample_db"
+
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            if parking_lot_id:
+                parking_lot = next(
+                    (lot for lot in cached_data if lot["parking_id"] == parking_lot_id.upper()), None)
+                if parking_lot:
+                    serializer = ParkingLotSerializer(parking_lot)
+                    return Response(serializer.data)
+                else:
+                    return Response({"error": "Parking lot not found"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(cached_data)
+
+        query = 'SELECT * FROM "AwsDataCatalog"."spotfinder-schema"."parking_list_lots"'
+        database = 'spotfinder-schema'
         output_location = "s3://spotfinder-data-bucket/Athena_output/"
-        query_execution_id = query_athena(query, database, output_location)
-        results = get_query_results(query_execution_id)
+        query_execution_id = async_to_sync(query_athena)(
+            query, database, output_location)
+        results = async_to_sync(get_query_results)(query_execution_id)
         spots_data = results_to_dataframe(results)
 
         data = merge_data(METADATA, spots_data)
@@ -189,6 +177,7 @@ class ParkingLotView(APIView):
                 (lot for lot in data if lot["parking_id"] == parking_lot_id.upper()), None)
             if parking_lot:
                 serializer = ParkingLotSerializer(parking_lot)
+                cache.set(cache_key, data, timeout=3600)
                 return Response(serializer.data)
             else:
                 return Response({"error": "Parking lot not found"}, status=status.HTTP_404_NOT_FOUND)
