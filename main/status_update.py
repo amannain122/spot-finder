@@ -28,8 +28,11 @@ try:
     file_exists = os.path.exists(csv_path)
     if not file_exists:
         raise FileNotFoundError(f"The file {csv_path} does not exist")
+    
+    file_name = os.path.basename(csv_path)
+    s3_key = os.path.join(role_arn, file_name)
 
-    s3_client.upload_file(csv_path, s3_bucket_name, csv_path)
+    s3_client.upload_file(csv_path, s3_bucket_name, s3_key)
     print('reachedHere7')
     print(f"File uploaded to S3 bucket {s3_bucket_name} successfully.")
 except NoCredentialsError:
