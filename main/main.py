@@ -6,13 +6,15 @@ import pandas as pd
 from datetime import datetime
 from multiprocessing import Process, Lock
 import os
-import Path
+from pathlib import Path
 
 # Function to process each parking lot
-def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path, lock):
+def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path, lock, root_dir):
     # Load the YOLO model
-    model = YOLO('../src/models/yolov8n.pt')
-
+    model_path = os.path.join(root_dir, 'src/models/yolov8n.pt')
+    #model = YOLO('../src/models/yolov8n.pt')
+    model = YOLO(model_path)
+    
     # Read the ROI CSV file
     data = pd.read_csv(roi_csv_path)
 
@@ -154,7 +156,7 @@ def main():
         video_url = lot['URL']
         roi_csv_path = lot['ROI']
 
-        p = Process(target=process_parking_lot, args=(parking_lot_id, video_url, roi_csv_path, output_csv_path, lock))
+        p = Process(target=process_parking_lot, args=(parking_lot_id, video_url, roi_csv_path, output_csv_path, lock, root_dir))
         p.start()
         processes.append(p)
 
