@@ -216,13 +216,18 @@ class BookingViewSet(ListCreateAPIView):
                 return Response({"detail": "You have already booked a parking spot."}, status=status.HTTP_400_BAD_REQUEST)
 
              # Check if the parking spot is already booked
-            if Booking.objects.filter(parking_spot=request.parking_spot, booking_status='booked').exists():
+
+            parking_spot = request.data.get('parking_spot')
+            parking_id = request.data.get('parking_id')
+
+            if Booking.objects.filter(parking_spot=parking_spot, parking_id=parking_id, booking_status='booked').exists():
                 return Response({"detail": "This parking spot is already booked. Please choose another spot."}, status=status.HTTP_400_BAD_REQUEST)
 
             note = serializer.save()
             if note:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+<<<<<<< HEAD
 
 
 SECRET_KEY = set.TOKEN
@@ -236,6 +241,8 @@ def decode_token(token):
         return decoded.decode()
     except InvalidToken:
         return None
+=======
+>>>>>>> 9acf019 (fix parking validation)
 
 
 class BookingAPI(ListAPIView):
