@@ -173,10 +173,19 @@ class BookingViewSet(ListCreateAPIView):
         serializer = BookingSerializer(
             data=request.data, context={"request": request})
         if serializer.is_valid():
+            # Check if the user has already booked the spot
+            if Booking.objects.filter(user=request.user, booking_status='booked').exists():
+                return Response({"detail": "You have already booked a parking spot."}, status=status.HTTP_400_BAD_REQUEST)
+            
+             # Check if the parking spot is already booked
+            if Booking.objects.filter(parking_spot=request.parking_spot, booking_status='booked').exists():
+                return Response({"detail": "This parking spot is already booked. Please choose another spot."}, status=status.HTTP_400_BAD_REQUEST)
+            
             note = serializer.save()
             if note:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
 
 
 class BookingAPI(ListAPIView):
