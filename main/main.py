@@ -154,7 +154,7 @@ def main():
     for index, lot in parking_lots_data.iterrows():
         parking_lot_id = lot['ParkingLotID']
         video_url = lot['URL']
-        roi_csv_path = lot['ROI']
+        roi_csv_path = os.path.join(root_dir, 'src/data', lot['ROI'])
 
         p = Process(target=process_parking_lot, args=(parking_lot_id, video_url, roi_csv_path, output_csv_path, lock, root_dir))
         p.start()
