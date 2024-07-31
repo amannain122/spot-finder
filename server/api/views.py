@@ -1,4 +1,6 @@
 
+from .utils import query_athena, get_query_results, results_to_dataframe
+from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.middleware.csrf import get_token
 from rest_framework.response import Response
@@ -13,6 +15,12 @@ from rest_framework import status
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, BookingSerializer, ParkingLotSerializer, AllBookingSerializer
 from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
 from .models import User, Booking
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from .utils import query_athena, get_query_results, results_to_dataframe
+from .serializers import ParkingLotSerializer
+from django.core.cache import cache
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):
@@ -116,19 +124,48 @@ def merge_data(metadata, spots):
     return parking_lots
 
 
+# class ParkingListView(APIView):
+#     permission_classes = [permissions.AllowAny]
+
+#     def get(self, request):
+#         query = "SELECT * FROM athena_spot_finder.parking_lots;"
+#         database = "sample_db"
+#         output_location = "s3://spotfinder-data-bucket/Athena_output/"
+#         query_execution_id = query_athena(query, database, output_location)
+#         results = get_query_results(query_execution_id)
+
+#         spots_data = results_to_dataframe(results)
+#         data = merge_data(METADATA, spots_data)
+#         serializer = ParkingLotSerializer(data, many=True)
+#         return Response(serializer.data)
+
+
 class ParkingListView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
+        cache_key = 'parking_lots_data'
+
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            return Response(cached_data)
+
+        # Convert async function calls to sync using async_to_sync
         query = "SELECT * FROM athena_spot_finder.parking_lots;"
         database = "sample_db"
         output_location = "s3://spotfinder-data-bucket/Athena_output/"
-        query_execution_id = query_athena(query, database, output_location)
-        results = get_query_results(query_execution_id)
+
+        query_execution_id = async_to_sync(query_athena)(
+            query, database, output_location)
+        results = async_to_sync(get_query_results)(query_execution_id)
 
         spots_data = results_to_dataframe(results)
         data = merge_data(METADATA, spots_data)
         serializer = ParkingLotSerializer(data, many=True)
+
+        cache.set(cache_key, serializer.data, timeout=3600)
+
         return Response(serializer.data)
 
 
