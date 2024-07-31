@@ -10,7 +10,8 @@ dotenv_path = root_dir / '.env'
 load_dotenv(dotenv_path=dotenv_path)
 
 # Define absolute file path and S3 details
-csv_path = str((root_dir / 'src' / 'data' / 'parking_status.csv').resolve())
+# csv_path = str((root_dir / 'src' / 'data' / 'parking_status.csv').resolve())
+csv_path = os.path.join(root_dir, 'src/data/parking_status.csv')
 s3_bucket_name = 'spotfinder-data-bucket'
 role_arn = 'arn:aws:s3:::spotfinder-data-bucket/SampleAthena/parking_status/'
 
