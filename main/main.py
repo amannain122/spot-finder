@@ -5,6 +5,8 @@ import yt_dlp
 import pandas as pd
 from datetime import datetime
 from multiprocessing import Process, Lock
+import os
+import Path
 
 # Function to process each parking lot
 def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path, lock):
@@ -135,8 +137,10 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
 
 # Main function to read the parking_lots.csv and start processes
 def main():
-    parking_lots_csv_path = '../src/data/parking_lots.csv'
-    output_csv_path = '../src/data/parking_status.csv'
+
+    root_dir = Path(__file__).resolve().parents[1]
+    parking_lots_csv_path = os.path.join(root_dir, 'src/data/parking_lots.csv')
+    output_csv_path = os.path.join(root_dir, 'src/data/parking_status.csv')
 
     # Read the parking lots CSV
     parking_lots_data = pd.read_csv(parking_lots_csv_path)
