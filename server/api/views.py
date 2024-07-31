@@ -227,7 +227,6 @@ class BookingViewSet(ListCreateAPIView):
             if note:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-<<<<<<< HEAD
 
 
 SECRET_KEY = set.TOKEN
@@ -241,8 +240,6 @@ def decode_token(token):
         return decoded.decode()
     except InvalidToken:
         return None
-=======
->>>>>>> 9acf019 (fix parking validation)
 
 
 class BookingAPI(ListAPIView):
