@@ -17,10 +17,10 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     ports:
-      - 80:80
+      - "8080:80" # Changed port to avoid conflict
     volumes:
-      - static_volume:/store/staticfiles/
-      - media_volume:/store/mediafiles/
+      - static_volume:/spot-finder-backend/staticfiles/
+      - media_volume:/spot-finder-backend/mediafiles/
 
 volumes:
   static_volume:
