@@ -16,11 +16,13 @@ django-filter==24.2
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
 frozenlist==1.4.1
+gunicorn==22.0.0
 idna==3.7
 jmespath==1.0.1
 Markdown==3.6
 multidict==6.0.5
 numpy==2.0.0
+packaging==24.1
 pandas==2.2.2
 pycparser==2.22
 PyJWT==2.8.0
