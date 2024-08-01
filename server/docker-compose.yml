@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  backend:
+  spot-finder-backend:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -9,3 +9,19 @@ services:
       - "8000:8000"
     environment:
       DEBUG: "True"
+    expose:
+      - 80
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    volumes:
+      - static_volume:/store/staticfiles/
+      - media_volume:/store/mediafiles/
+
+volumes:
+  static_volume:
+  media_volume:
