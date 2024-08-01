@@ -73,8 +73,8 @@ async def get_query_results(query_execution_id):
             status = response['QueryExecution']['Status']['State']
             if status in ['SUCCEEDED', 'FAILED', 'CANCELLED']:
                 break
-            print(f"Current status: {
-                  status}. Waiting for query to complete...")
+            # print(f"Current status: {
+            #       status}. Waiting for query to complete...")
             await asyncio.sleep(5)  # Wait for 5 seconds before checking again
 
         if status == 'SUCCEEDED':
