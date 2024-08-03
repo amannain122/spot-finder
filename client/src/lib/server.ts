@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 
 // backend server url
 export const BASE_URL =
-  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_SERVER_URL || "http://107.21.53.156";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
