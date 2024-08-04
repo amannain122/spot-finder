@@ -17,8 +17,9 @@ from cryptography.fernet import Fernet, InvalidToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-import core.settings as set
 import environ
+from django.db.models import Case, When, Value, IntegerField
+
 
 env = environ.Env()
 
@@ -175,19 +176,22 @@ class BookingViewSet(ListCreateAPIView):
 
     def get_queryset(self):
         id = self.request.user.id
-        return Booking.objects.filter(user=id)
+        return Booking.objects.filter(user=id).annotate(
+            status_order=Case(
+                When(booking_status='booked', then=Value(1)),
+                When(booking_status='canceled', then=Value(2)),
+                When(booking_status='expired', then=Value(3)),
+                output_field=IntegerField(),
+            )
+        ).order_by('status_order')
 
     def post(self, request, *args, **kwargs):
-        serializer = BookingSerializer(
-            data=request.data, context={"request": request})
+        serializer = BookingSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             note = serializer.save()
             if note:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-SECRET_KEY = set.TOKEN
 
 
 def decode_token(token):
