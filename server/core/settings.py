@@ -156,8 +156,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3001",
     "http://localhost:3002",
     "https://spot-find.vercel.app",
+    'https://spotfinder.prakashpun.com.np',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://spotfinder.prakashpun.com.np',
+    # other origins
+]
 
 AUTH_USER_MODEL = 'api.CustomUser'
 

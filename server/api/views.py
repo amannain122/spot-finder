@@ -131,28 +131,23 @@ class ParkingListView(APIView):
         return Response(serializer.data)
 
     def update_spot_status(self, data):
-        # Iterate through the parking lots in the data
         for lot in data:
             parking_id = lot['parking_id']
+            available_spots_count = lot.get('available_spots', 0)
+            reserved_spots_count = lot.get('reserved_spots', 0)
 
-            # Iterate through each spot in the parking lot
             for spot in lot['spots']:
                 spot_id = spot['spot']
-
-                # Check if there's a booking for this parking lot and spot
                 booking = Booking.objects.filter(
                     parking_id=parking_id, parking_spot=spot_id, booking_status="booked").first()
 
-                booking_cancel = Booking.objects.filter(
-                    parking_id=parking_id, parking_spot=spot_id, booking_status="canceled").first()
-
-                if booking:
-                    # If a booking exists, update the spot status to 'occupied'
+                if booking and spot['status'] == 'empty':
                     spot['status'] = 'occupied'
+                    available_spots_count -= 1
+                    reserved_spots_count += 1
 
-                if booking_cancel:
-                    # If a booking exists, update the spot status to 'occupied'
-                    spot['status'] = 'empty'
+            lot['available_spots'] = available_spots_count
+            lot['reserved_spots'] = reserved_spots_count
 
 
 class ParkingLotView(APIView):
@@ -161,18 +156,16 @@ class ParkingLotView(APIView):
 
     def get(self, request, parking_lot_id=None):
         cache_key = 'parking_status_lots_data'
+        cached_data = cache.get(cache_key)
 
         if parking_lot_id and parking_lot_id.upper() not in self.PARKING_LOT_CHOICES:
             return Response({"error": "Parking Detail Not Found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        cached_data = cache.get(cache_key)
 
         if cached_data:
             if parking_lot_id:
                 parking_lot = next(
                     (lot for lot in cached_data if lot["parking_id"] == parking_lot_id.upper()), None)
                 if parking_lot:
-                    # Update spot status from cache
                     self.update_spot_status(parking_lot)
                     cache.set(cache_key, cached_data, timeout=3600)
                     serializer = ParkingLotSerializer(parking_lot)
@@ -181,12 +174,9 @@ class ParkingLotView(APIView):
                     return Response({"error": "Parking lot not found"}, status=status.HTTP_404_NOT_FOUND)
             else:
                 for lot in cached_data:
-                    # Update spot status for all lots
                     self.update_spot_status(lot)
-                # Update the cache with the new data
                 cache.set(cache_key, cached_data, timeout=3600)
                 return Response(cached_data)
-                # return Response(cached_data)
 
         query = 'SELECT * FROM "AwsDataCatalog"."spotfinder-schema"."parking_list_lots"'
         database = 'spotfinder-schema'
@@ -208,35 +198,39 @@ class ParkingLotView(APIView):
                 return Response(serializer.data)
             else:
                 return Response({"error": "Parking lot not found"}, status=status.HTTP_404_NOT_FOUND)
-
         else:
             for lot in data:
                 self.update_spot_status(lot)
             serializer = ParkingLotSerializer(data, many=True)
-            # Set the full data to cache after processing
             cache.set(cache_key, data, timeout=3600)
             return Response(serializer.data)
 
     def update_spot_status(self, parking_lot):
         parking_id = parking_lot['parking_id']
+        initial_available_spots = parking_lot.get('available_spots', 0)
+        initial_reserved_spots = parking_lot.get('reserved_spots', 0)
 
         for spot in parking_lot['spots']:
             spot_id = spot['spot']
-
-            # Check if there's a booking for this parking lot and spot
+            # Checking if there's a 'booked' status or 'canceled' status for this parking lot and spot
             booking = Booking.objects.filter(
-                parking_id=parking_id, parking_spot=spot_id, booking_status="booked").first()
-
-            booking_cancel = Booking.objects.filter(
-                parking_id=parking_id, parking_spot=spot_id, booking_status="canceled").first()
+                parking_id=parking_id, parking_spot=spot_id).order_by('-updated_at').first()
 
             if booking:
-                # If a booking exists, update the spot status to 'occupied'
-                spot['status'] = 'occupied'
+                if booking.booking_status == "booked":
+                    if spot['status'] == 'empty':
+                        spot['status'] = 'occupied'
+                        initial_available_spots -= 1
+                        initial_reserved_spots += 1
+                elif booking.booking_status == "canceled":
+                    if spot['status'] == 'occupied':
+                        spot['status'] = 'empty'
+                        initial_reserved_spots -= 1
+                        initial_available_spots += 1
 
-            if booking_cancel:
-                # If a booking exists, update the spot status to 'occupied'
-                spot['status'] = 'empty'
+                # Update the parking lot's available_spots and reserved_spots counts
+        parking_lot['available_spots'] = initial_available_spots
+        parking_lot['reserved_spots'] = initial_reserved_spots
 
 
 class BookingViewSet(ListCreateAPIView):
@@ -256,8 +250,7 @@ class BookingViewSet(ListCreateAPIView):
             if Booking.objects.filter(user=request.user, booking_status='booked').exists():
                 return Response({"detail": "You have already booked a parking spot."}, status=status.HTTP_400_BAD_REQUEST)
 
-             # Check if the parking spot is already booked
-
+            # Check if the parking spot is already booked
             parking_spot = request.data.get('parking_spot')
             parking_id = request.data.get('parking_id')
 

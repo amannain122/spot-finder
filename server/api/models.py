@@ -93,7 +93,7 @@ class Booking(models.Model):
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, blank=True, null=True)
     parking_id = models.CharField(max_length=10, choices=PARKING_LOT_CHOICES)
-    parking_spot = models.CharField(max_length=10, unique=True)
+    parking_spot = models.CharField(max_length=10)
     parking_charge = models.DecimalField(
         max_digits=10, decimal_places=2, default=0)
     parking_time = models.CharField(
