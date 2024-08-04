@@ -53,7 +53,6 @@ export function ProfileForm() {
     const getProfile = async () => {
       const response = await getUser();
       if (response.status === "success") {
-        console.log(response.data);
         setData({
           first_name: response?.data?.first_name || "",
           last_name: response?.data?.last_name || "",
