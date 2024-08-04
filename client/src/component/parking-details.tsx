@@ -13,6 +13,7 @@ import { ParkingBox } from "./parking-box";
 import { SelectSeparator } from "@/components/ui/select";
 import { Loading } from "@/atoms/loading";
 import { useToast } from "@/components/ui/use-toast";
+import BackBtn from "@/atoms/back-btn";
 
 const location = [
   {
@@ -123,8 +124,9 @@ const ParkingDetail = () => {
     <Suspense fallback={<div>Loading...</div>}>
       <div>
         <div>
-          <div className="flex flex-row items-center justify-between w-full gap-8 mt-8">
-            <div className=" p-4">
+          <div className="flex flex-row items-center justify-between w-full gap-8 mt-4">
+            <div className="p-4">
+              <BackBtn />
               <h2 className="text-lg font-semibold mb-2">
                 {parking?.address || ""}
               </h2>

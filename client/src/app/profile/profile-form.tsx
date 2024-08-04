@@ -14,6 +14,24 @@ const checkField = (data: any) => {
   if (!data.last_name) {
     return { isValid: false, message: "Please enter last name!" };
   }
+  if (!data.car_no_plate) {
+    return { isValid: false, message: "Please enter Vehicle No. plate!" };
+  }
+  const plateRegex = /^[A-Z0-9]{3}[ -]?[A-Z0-9]{3}$/i;
+  if (!plateRegex.test(data.car_no_plate)) {
+    return {
+      isValid: false,
+      message: "Vehicle No. plate should be in the format ABC123 or ABC 123",
+    };
+  }
+
+  if (data.car_no_plate.length < 6) {
+    return {
+      isValid: false,
+      message: "Vehicle No. plate should be at least 6 characters long!",
+    };
+  }
+
   return { isValid: true, message: "" };
 };
 
@@ -25,6 +43,7 @@ export function ProfileForm() {
     first_name: "",
     last_name: "",
     email: "",
+    car_no_plate: "",
   });
 
   const handleUpdate = async (e: any) => {
@@ -37,6 +56,7 @@ export function ProfileForm() {
     const response = await updateUser({
       first_name: data.first_name || "",
       last_name: data.last_name || "",
+      car_no_plate: data.car_no_plate || "",
     });
     if (response.status === "success") {
       toast({
@@ -57,6 +77,7 @@ export function ProfileForm() {
           first_name: response?.data?.first_name || "",
           last_name: response?.data?.last_name || "",
           email: response?.data?.email || "",
+          car_no_plate: response?.data?.car_no_plate || "",
         });
       }
     };
@@ -86,6 +107,17 @@ export function ProfileForm() {
           required
           value={data.last_name}
           onChange={(e) => setData({ ...data, last_name: e.target.value })}
+        />
+      </div>
+      <div className="mb-4">
+        <Label htmlFor="lastName">
+          Vehicle No. Plate<span className="text-red-500">*</span>
+        </Label>
+        <Input
+          type="text"
+          required
+          value={data.car_no_plate}
+          onChange={(e) => setData({ ...data, car_no_plate: e.target.value })}
         />
       </div>
       <div className="mb-6">

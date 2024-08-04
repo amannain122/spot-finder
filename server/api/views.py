@@ -88,12 +88,16 @@ class UserView(APIView):
             return Response({"detail": "Error creating user", "error": str(exe)}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, format=None):
-        serializer = UserSerializer(
-            request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(id=request.user.id)
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            return Response({"detail": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ParkingListView(APIView):
