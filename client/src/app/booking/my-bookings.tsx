@@ -1,7 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { getMyBookings } from "@/lib/server";
+import { BASE_URL, getMyBookings } from "@/lib/server";
+import { useToast } from "@/components/ui/use-toast";
 
 const parkingIconUrl =
   "https://cdn1.iconfinder.com/data/icons/city-elements-56/520/416_Car_Parking_Transport-512.png";
@@ -11,7 +12,7 @@ export const MyBookings = () => {
   const [loading, setLoading] = useState(true);
   const [cancelBookingId, setCancelBookingId] = useState<number | null>(null);
 
-  console.log(bookings);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -43,20 +44,20 @@ export const MyBookings = () => {
       try {
         // Call backend API to cancel the booking
         const token = localStorage.getItem("token");
-        await fetch(
-          `http://127.0.0.1:8000/api/bookings/${cancelBookingId}/cancel/`,
-          {
-            method: "PATCH",
-            headers: {
-              Authorization: `JWT ${token}`,
-            },
-          }
-        );
+        await fetch(`${BASE_URL}/api/bookings/${cancelBookingId}/cancel/`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        });
 
         // Update the bookings state to remove the cancelled booking
         const updatedBookings = bookings.map((booking: any) => {
           if (booking.id === cancelBookingId) {
             booking.booking_status = "cancelled";
+            toast({
+              title: "Booking Cancelled!!!",
+            });
           }
           return booking;
         });
