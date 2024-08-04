@@ -15,6 +15,12 @@ from cryptography.fernet import Fernet, InvalidToken
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, BookingSerializer, ParkingLotSerializer, AllBookingSerializer
 from .utils import METADATA, query_athena, get_query_results, results_to_dataframe, merge_data
 from .models import User, Booking
+from cryptography.fernet import Fernet, InvalidToken
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+import environ
+from django.db.models import Case, When, Value, IntegerField
 from rest_framework.views import APIView
 from .serializers import ParkingLotSerializer
 import core.settings as set
@@ -243,11 +249,17 @@ class BookingViewSet(ListCreateAPIView):
 
     def get_queryset(self):
         id = self.request.user.id
-        return Booking.objects.filter(user=id)
+        return Booking.objects.filter(user=id).annotate(
+            status_order=Case(
+                When(booking_status='booked', then=Value(1)),
+                When(booking_status='canceled', then=Value(2)),
+                When(booking_status='expired', then=Value(3)),
+                output_field=IntegerField(),
+            )
+        ).order_by('status_order')
 
     def post(self, request, *args, **kwargs):
-        serializer = BookingSerializer(
-            data=request.data, context={"request": request})
+        serializer = BookingSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             # Check if the user has already booked the spot
             if Booking.objects.filter(user=request.user, booking_status='booked').exists():
