@@ -11,17 +11,3 @@ services:
       DEBUG: "True"
     expose:
       - 80
-
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    ports:
-      - "8080:80" # Changed port to avoid conflict
-    volumes:
-      - static_volume:/spot-finder-backend/staticfiles/
-      - media_volume:/spot-finder-backend/mediafiles/
-
-volumes:
-  static_volume:
-  media_volume:
