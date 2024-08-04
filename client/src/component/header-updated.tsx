@@ -35,13 +35,12 @@ export const Header = () => {
   const router = useRouter();
   const [token, setToken] = useState("");
 
-  useEffect(
-    () => () => {
-      const token = getJwtToken();
-      setToken(token || "");
-    },
-    []
-  );
+  useEffect(() => {
+    const token = getJwtToken();
+    setToken(token || "");
+  }, []);
+
+  console.log(token);
   const handleLogout = () => {
     localStorage.removeItem("token");
     router.push("/login");
