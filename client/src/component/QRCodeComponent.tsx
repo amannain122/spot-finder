@@ -1,7 +1,7 @@
 "use client";
 // src/component/QRCodeComponent.tsx
-import React from 'react';
-import QRCode from 'qrcode.react';
+import React from "react";
+import QRCode from "qrcode.react";
 
 interface QRCodeComponentProps {
   url: string;

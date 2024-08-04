@@ -1,7 +1,8 @@
 import axios, { AxiosRequestConfig } from "axios";
 
 // backend server url
-export const BASE_URL = "http://localhost:8000";
+export const BASE_URL =
+  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:8000";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -180,7 +181,7 @@ export const handleError = (err: any, showToast = true) => {
 };
 
 const getParkingSpot = async () => {
-  const api = `${BASE_URL}/api/parking-status/`;
+  const api = `${BASE_URL}/api/parking-list/`;
 
   try {
     const response = await getData(api);
@@ -197,10 +198,60 @@ const getParkingSpot = async () => {
 };
 
 const getSingleParkingSpot = async (id: string) => {
-  const api = `${BASE_URL}/api/parkinglots/${id}/`;
+  const api = `${BASE_URL}/api/parking-status/${id}/`;
 
   try {
     const response = await getData(api);
+    return {
+      status: "success",
+      data: response.data,
+    };
+  } catch (error) {
+    return {
+      status: "failure",
+      data: error,
+    };
+  }
+};
+
+const confirmParkingSpot = async (repo: any) => {
+  const api = `${BASE_URL}/api/bookings/`;
+
+  const token = localStorage.getItem("token");
+
+  const config = {
+    headers: {
+      Authorization: `JWT ${token}`,
+    },
+  };
+
+  try {
+    const response = await postData(api, repo, config);
+    return {
+      status: "success",
+      data: response.data,
+    };
+  } catch (error) {
+    return {
+      status: "failure",
+      data: error,
+    };
+  }
+};
+
+const getMyBookings = async () => {
+  const api = `${BASE_URL}/api/bookings/`;
+
+  const token = localStorage.getItem("token");
+
+  const config = {
+    headers: {
+      Authorization: `JWT ${token}`,
+    },
+  };
+
+  try {
+    const response = await getData(api, config);
     return {
       status: "success",
       data: response.data,
@@ -222,4 +273,6 @@ export {
   getUser,
   getParkingSpot,
   getSingleParkingSpot,
+  confirmParkingSpot,
+  getMyBookings,
 };

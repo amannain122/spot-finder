@@ -4,7 +4,7 @@ import { SidebarNav } from "./nav";
 import { Layout } from "@/component/layout";
 
 export const metadata: Metadata = {
-  title: "Profile | Spot Finder",
+  title: "Bookings | Spot Finder",
 };
 
 const sidebarNavItems = [

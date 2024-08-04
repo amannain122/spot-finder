@@ -1,23 +1,9 @@
 import { Metadata } from "next";
-import Image from "next/image";
-import { Separator } from "@/components/ui/separator";
-import { Header } from "@/component/header";
-import { SidebarNav } from "./nav";
+import { Layout } from "@/component/layout";
 
 export const metadata: Metadata = {
-  title: "Profile | Spot Finder",
+  title: "Parking QR | Spot Finder",
 };
-
-const sidebarNavItems = [
-  {
-    title: "Profile",
-    href: "/profile",
-  },
-  {
-    title: "Bookings",
-    href: "/",
-  },
-];
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
@@ -26,8 +12,7 @@ interface SettingsLayoutProps {
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
     <>
-      <div className="p-width m-4 space-y-6  pb-16 md:block">
-        <Header />
+      <Layout>
         <div className="space-y-0.5">
           <h2 className="text-2xl font-bold tracking-tight">QR Codes</h2>
           <p className="text-muted-foreground">
@@ -35,7 +20,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
           </p>
         </div>
         <div className="">{children}</div>
-      </div>
+      </Layout>
     </>
   );
 }

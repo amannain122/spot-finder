@@ -1,30 +1,18 @@
 
-from rest_framework import generics
-from api.models import Post
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from django.conf import settings
 from django.middleware.csrf import get_token
-from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView, ListAPIView
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from rest_framework import serializers
 from rest_framework import permissions
 from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-<<<<<<< HEAD
-from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView
-=======
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
->>>>>>> 981a5d780608ce05eaf04efc7a2a2089f873c257
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import UserSerializer, MyTokenObtaionPairSerializer, PostSerializer, ParkingLotSerializer, BookingSerializer
+from .serializers import UserSerializer, MyTokenObtaionPairSerializer, BookingSerializer, ParkingLotSerializer, AllBookingSerializer
 from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
-from .models import User, Booking, CustomUser
+from .models import User, Booking
 
 
 class IsAdminOrUserPermission(permissions.BasePermission):
@@ -53,7 +41,7 @@ class TokenObtainView(TokenObtainPairView):
 
         res = Response(serializer.validated_data, status=status.HTTP_200_OK)
         refresh_token = serializer.validated_data['refresh']
-        # access_token = serializer.validated_data['access']
+        access_token = serializer.validated_data['access']
         get_token(request)
         res.set_cookie("refresh_token", refresh_token, max_age=settings.SIMPLE_JWT.get(
             'REFRESH_TOKEN_LIFETIME').total_seconds(), samesite='Lax', secure=False, httponly=True)
@@ -99,52 +87,6 @@ class UserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PostList(generics.ListCreateAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-
-
-class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-    pass
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def confirm_booking(request):
-    serializer = BookingSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save(user=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserView(APIView):
-    permission_classes = [IsAdminOrUserPermission]
-
-    def post(self, request, format='json'):
-        try:
-            serializer = UserSerializer(
-                data=request.data, context={"request": request})
-            if serializer.is_valid():
-                # Save user data
-                user = serializer.save()
-
-                # Handle file upload to S3 if applicable
-                if 'file' in request.FILES:
-                    file = request.FILES['file']
-                    # file_url = upload_file_to_s3(file)
-                    # Optionally, you can save the S3 file URL to your user object
-                    # user.file_url = file_url
-                    # user.save()
-
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except serializers.ValidationError as err:
-            return Response(err.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as exe:
-            return Response({"detail": "Error creating user", "error": str(exe)}, status=status.HTTP_400_BAD_REQUEST)
-
-
 def merge_data(metadata, spots):
     parking_lots = []
     for idx, lot in enumerate(metadata):
@@ -174,7 +116,7 @@ def merge_data(metadata, spots):
     return parking_lots
 
 
-class ParkingStatusView(APIView):
+class ParkingListView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
@@ -192,8 +134,11 @@ class ParkingStatusView(APIView):
 
 class ParkingLotView(APIView):
     permission_classes = [permissions.AllowAny]
+    PARKING_LOT_CHOICES = ['PL01', 'PL02', 'PL03']
 
     def get(self, request, parking_lot_id=None):
+        if parking_lot_id and parking_lot_id.upper() not in self.PARKING_LOT_CHOICES:
+            return Response({"error": "Parking Detail Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         query = "SELECT * FROM athena_spot_finder.parking_lots;"
         database = "sample_db"
         output_location = "s3://spotfinder-data-bucket/Athena_output/"
@@ -204,7 +149,7 @@ class ParkingLotView(APIView):
         data = merge_data(METADATA, spots_data)
         if parking_lot_id:
             parking_lot = next(
-                (lot for lot in data if lot["parking_id"] == parking_lot_id), None)
+                (lot for lot in data if lot["parking_id"] == parking_lot_id.upper()), None)
             if parking_lot:
                 serializer = ParkingLotSerializer(parking_lot)
                 return Response(serializer.data)
@@ -232,6 +177,11 @@ class BookingViewSet(ListCreateAPIView):
             if note:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BookingAPI(ListAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = AllBookingSerializer
 
 
 class CancelBookingView(RetrieveUpdateAPIView):

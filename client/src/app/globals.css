@@ -76,6 +76,7 @@
 }
 .map-container {
   height: 60vh;
+  width: 100%;
 }
 
 .map-detail-container {
@@ -101,13 +102,17 @@ body {
 }
 
 .p-width {
-  padding-left: calc((100% - 1200px) / 2);
-  padding-right: calc((100% - 1200px) / 2);
+  padding-left: calc((100% - 1400px) / 2);
+  padding-right: calc((100% - 1400px) / 2);
 }
 
 .mapboxgl-popup-content {
   /* background: none !important; */
   box-shadow: none !important;
+}
+
+.top-imp {
+  top: 0 !important;
 }
 
 .mapboxgl-popup-close-button {

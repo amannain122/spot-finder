@@ -12,8 +12,7 @@ export default function SettingsProfilePage() {
       </div>
       <Separator />
       <ProfileForm />
+      <br />
     </div>
   );
 }
-
-
