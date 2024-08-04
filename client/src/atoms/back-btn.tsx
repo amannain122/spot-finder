@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const BackBtn = () => {
   return (
-    <div className="flex h-7 w-7 items-center justify-center rounded-md border transition-all hover:bg-black/5 cursor-pointer">
+    <div className="flex mb-3 h-8 w-8 items-center justify-center rounded-md border border-gray-400 transition-all hover:bg-black/5 cursor-pointer">
       <Link className="cursor-pointer" href={"/"}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -11,7 +11,7 @@ const BackBtn = () => {
           strokeWidth="2"
           stroke="currentColor"
           aria-hidden="true"
-          className="h-5 w-5 text-gray-400"
+          className="h-5 w-5 text-gray-800"
         >
           <path
             strokeLinecap="round"

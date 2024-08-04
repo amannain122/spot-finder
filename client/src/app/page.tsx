@@ -1,13 +1,12 @@
 import { Header } from "@/component/header";
 import { Home } from "@/component/home";
+import { Layout } from "@/component/layout";
 
 const HomePage = () => {
   return (
-    <div className="p-width m-4 relative">
-      <Header />
-      <br />
+    <Layout>
       <Home />
-    </div>
+    </Layout>
   );
 };
 

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import CustomUser, User, Post, Booking
+from .models import CustomUser, User, Booking
 
 
 class MyTokenObtaionPairSerializer(TokenObtainPairSerializer):
@@ -70,18 +70,6 @@ class UserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class PostSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Post
-        fields = ('id', 'coordinates', 'availability', 'capacity',
-                  'available_space', 'price', 'time_restrictions')
-
-
-class QRCodeSerializer(serializers.Serializer):
-    data = serializers.CharField(max_length=200)
-
-
 class CoordinatesSerializer(serializers.Serializer):
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
@@ -117,17 +105,49 @@ class ParkingLotSerializer(serializers.Serializer):
     spots = ParkingSpotSerializer(many=True)
 
 
+METADATA = [
+    {
+        "id": "PL01",
+        "location": "49.00426480950375, -122.73464953172447",
+        "address": "120 176 St, Surrey, BC V3S 9S2"
+    },
+    {
+        "id": "PL02",
+        "location": "",
+        "address": "Main Street"
+    },
+    {
+        "id": "PL03",
+        "location": "51.08961722612397, -115.35780639113904",
+        "address": "630 8 St, Canmore, AB T1W 2B5"
+    }
+]
+
+
+def get_parking_lot_choices():
+    return [(lot["id"], lot["id"]) for lot in METADATA]
+
+
 class BookingSerializer(serializers.ModelSerializer):
+    parking_id = serializers.ChoiceField(choices=get_parking_lot_choices())
+    parking_details = serializers.SerializerMethodField()
+
     class Meta:
         model = Booking
         fields = [
-            'id', 'user', 'parking_id', 'parking_spot', 'parking_charge',
+            'id', 'user', 'parking_id', 'parking_details', 'parking_spot', 'parking_charge',
             'parking_time', 'booking_status', 'created_at', 'updated_at'
         ]
 
+    def get_parking_details(self, obj):
+        for lot in METADATA:
+            if lot['id'] == obj.parking_id:
+                return lot
+        return None
+
     def validate_parking_spot(self, value):
         request = self.context['request']
-        if Booking.objects.filter(parking_spot=value, user=request.user).exists():
+        if Booking.objects.filter(parking_spot=value, user=request.user, booking_status="booked").exists():
             raise serializers.ValidationError(
                 "You have already booked this parking spot.")
         return value
@@ -143,3 +163,30 @@ class BookingSerializer(serializers.ModelSerializer):
         owner = request.user
         validated_data['user'] = owner
         return super().create(validated_data)
+
+
+class UserTestSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["id", 'first_name', 'last_name', 'email',
+                  'car_no_plate', 'is_active', 'created_at']
+
+
+class AllBookingSerializer(serializers.ModelSerializer):
+    parking_id = serializers.ChoiceField(choices=get_parking_lot_choices())
+    parking_details = serializers.SerializerMethodField()
+    user = UserTestSerializer(read_only=True)
+
+    class Meta:
+        model = Booking
+        fields = [
+            'id', 'user', 'parking_id', 'parking_details', 'parking_spot', 'parking_charge',
+            'parking_time', 'booking_status', 'created_at', 'updated_at'
+        ]
+
+    def get_parking_details(self, obj):
+        for lot in METADATA:
+            if lot['id'] == obj.parking_id:
+                return lot
+        return None

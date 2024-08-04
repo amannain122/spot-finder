@@ -1,16 +1,16 @@
-import { Header } from "@/component/header";
 import { AboutSection } from "@/component/about-section";
 import { Team } from "@/component/team";
+import { Layout } from "@/component/layout";
+
+import BackBtn from "@/atoms/back-btn";
 
 
 const AboutPage = () => {
-  
   return (
-    <div className="p-width m-4 relative">
-      <Header />
+    <Layout>
       <AboutSection />
       <Team />
-    </div>
+    </Layout>
   );
 };
 

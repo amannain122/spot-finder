@@ -130,9 +130,11 @@ export const Header = () => {
     router.push("/profile");
   };
   return (
-    <div className="flex items-center h-16 justify-between">
+    <div className="flex items-center h-16 justify-between border-b-2">
       <div className="flex items-center">
-        <img src="/logo.jpeg" className="w-12 mr-6" />
+        <a href="/">
+          <img src="/logo.jpeg" className="w-12 mr-6" />
+        </a>
         <NavigationMenuDemo />
       </div>
       <div className="flex justify-center items-center gap-4">

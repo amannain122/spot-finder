@@ -2,15 +2,15 @@ import time
 import boto3
 import environ
 import pandas as pd
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError
-from botocore.exceptions import ClientError
+import asyncio
+from aiobotocore.session import get_session
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 
 env = environ.Env()
 
 AWS_S3_REGION_NAME = 'us-east-1'
-
-AWS_ACCESS_KEY_ID = ""
-AWS_SECRET_ACCESS_KEY = ""
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
 
 METADATA = [
     {
@@ -39,91 +39,112 @@ METADATA = [
     }
 ]
 
-athena_client = boto3.client(
-    service_name='athena',
-    region_name='us-east-1',
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-)
+async def query_athena(query, database, output_location):
+    session = get_session()
+    async with session.create_client('athena', region_name=AWS_S3_REGION_NAME,
+                                     aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                     aws_secret_access_key=AWS_SECRET_ACCESS_KEY) as client:
+        try:
+            response = await client.start_query_execution(
+                QueryString=query,
+                QueryExecutionContext={'Database': database},
+                ResultConfiguration={'OutputLocation': output_location},
+            )
+            query_execution_id = response['QueryExecutionId']
+            return query_execution_id
+        except (NoCredentialsError, PartialCredentialsError) as e:
+            print("AWS credentials not found or incomplete: ", str(e))
+        except ClientError as e:
+            print("Client error: ", str(e))
+        except Exception as e:
+            print("An error occurred: ", str(e))
 
 
-def query_athena(query, database, output_location):
-    try:
-        response = athena_client.start_query_execution(
-            QueryString=query,
-            QueryExecutionContext={'Database': database},
-            ResultConfiguration={'OutputLocation': output_location},
-        )
-        query_execution_id = response['QueryExecutionId']
-        return query_execution_id
-    except (NoCredentialsError, PartialCredentialsError) as e:
-        print("AWS credentials not found or incomplete: ", str(e))
-    except ClientError as e:
-        print("Client error: ", str(e))
-    except Exception as e:
-        print("An error occurred: ", str(e))
+async def get_query_results(query_execution_id):
+    session = get_session()
+    async with session.create_client('athena', region_name=AWS_S3_REGION_NAME,
+                                     aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                     aws_secret_access_key=AWS_SECRET_ACCESS_KEY) as client:
+
+        while True:
+            response = await client.get_query_execution(
+                QueryExecutionId=query_execution_id)
+            status = response['QueryExecution']['Status']['State']
+            if status in ['SUCCEEDED', 'FAILED', 'CANCELLED']:
+                break
+            # print(f"Current status: {
+            #       status}. Waiting for query to complete...")
+            await asyncio.sleep(5)  # Wait for 5 seconds before checking again
+
+        if status == 'SUCCEEDED':
+            print("Query succeeded. Fetching results...")
+            result = await client.get_query_results(
+                QueryExecutionId=query_execution_id)
+            return result
+        else:
+            raise Exception(
+                f"Query failed or was cancelled. Final status: {status}")
 
 
-def get_query_results(query_execution_id):
+def results_to_dataframe(athena_response):
+    # Step 1: Extract column names
+    columns = [col['VarCharValue']
+               for col in athena_response['ResultSet']['Rows'][0]['Data']]
 
-    # Poll for query completion
-    while True:
-        response = athena_client.get_query_execution(
-            QueryExecutionId=query_execution_id)
-        status = response['QueryExecution']['Status']['State']
-        if status in ['SUCCEEDED', 'FAILED', 'CANCELLED']:
-            break
-        print(f"Current status: {status}. Waiting for query to complete...")
-        time.sleep(5)  # Wait for 5 seconds before checking again
+    # Step 2: Extract data rows
+    rows = [
+        [data['VarCharValue'] if 'VarCharValue' in data else None for data in row['Data']]
+        for row in athena_response['ResultSet']['Rows'][1:]
+    ]
 
-    if status == 'SUCCEEDED':
-        print("Query succeeded. Fetching results...")
-        result = athena_client.get_query_results(
-            QueryExecutionId=query_execution_id)
-        return result
-    else:
-        raise Exception(
-            f"Query failed or was cancelled. Final status: {status}")
+    # Step 3: Convert to DataFrame
+    df = pd.DataFrame(rows, columns=columns)
 
+    df.columns = df.iloc[0]  # Set the first row as header
+    df = df[1:]  # Remove the first row from the data
 
-query = "SELECT * FROM athena_spot_finder.parking_lots;"
-database = "sample_db"
-output_location = "s3://spotfinder-data-bucket/Athena_output/"
-
-
-def results_to_dataframe(results):
-    rows = results['ResultSet']['Rows']
-    columns = [col['VarCharValue'] for col in rows[0]['Data']]
-    data = [[col['VarCharValue'] for col in row['Data']] for row in rows[1:]]
-    df = pd.DataFrame(data, columns=columns)
-    df.to_csv('out.csv', index=False)
-
-    file_path = 'out.csv'
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
-
-    # Extracting header and data rows
-    data_rows = [line.strip().split(',') for line in lines[1:]]
-
-    # Manually fixing the header and data rows
-    fixed_header = ['ParkingLotID', 'Timestamp', 'SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'SP6', 'SP7',
-                    'SP8', 'SP9', 'SP10', 'SP11', 'SP12', 'SP13', 'SP14', 'SP15', 'SP16', 'SP17',
-                    'SP18', 'SP19', 'SP20', 'SP21', 'SP22', 'SP23']
-
-    # Filtering the data rows to ensure correct length and structure
-    corrected_data_rows = [
-        row for row in data_rows if len(row) == len(fixed_header)]
-
-    # Creating the DataFrame with corrected header and data rows
-    corrected_data = pd.DataFrame(corrected_data_rows, columns=fixed_header)
-
-    # Stripping extraneous quotes and spaces from the data entries
-    corrected_data = corrected_data.map(lambda x: x.strip().strip('"'))
-
-    # Removing the first row which contains the column headers instead of actual data
-    corrected_data = corrected_data.iloc[1:].reset_index(drop=True)
-
-    # Converting the cleaned DataFrame to an array of objects (list of dictionaries)
-    array_of_objects = corrected_data.to_dict(orient='records')
+    array_of_objects = df.to_dict(orient='records')
 
     return array_of_objects
+
+
+def merge_data(metadata, athena_data):
+
+    data = athena_data
+
+    # Iterate through the metadata and match it with the data
+    parking_lots = []
+    for idx, lot in enumerate(metadata):
+        lot_spots = [row for row in data if row["ParkingLotID"]
+                     == lot["ParkingLotID"]]
+
+        if lot_spots:
+            # Assuming that spot columns are named SP1, SP2,...SP23
+            spots_list = [{"spot": f"SP{i+1}", "status": lot_spots[0].get(f"SP{i+1}", "empty")}
+                          for i in range(23)]
+
+            # Parse coordinates if available
+            coordinates = {"latitude": 0.0, "longitude": 0.0}
+            if lot["Location"]:
+                lat, lon = map(float, lot["Location"].split(","))
+                coordinates = {"latitude": lat, "longitude": lon}
+
+            # Calculate total, available, and reserved spots
+            total_spots = lot["Number of Spots"]
+            available_spots = sum(
+                1 for spot in spots_list if spot["status"] == "empty")
+            reserved_spots = total_spots - available_spots
+
+            # Build the parking lot dictionary
+            parking_lots.append({
+                "id": idx + 1,
+                "parking_id": lot["ParkingLotID"],
+                "coordinates": coordinates,
+                "total_spots": total_spots,
+                "available_spots": available_spots,
+                "reserved_spots": reserved_spots,
+                "address": lot["Address"],
+                "image": lot["URL"],
+                "spots": spots_list
+            })
+    return parking_lots

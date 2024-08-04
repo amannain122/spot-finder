@@ -37,6 +37,7 @@ else:
 SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=True)
+TOKEN = env('CRYPTO_KEY')
 
 ALLOWED_HOSTS = ["*"]
 
@@ -118,8 +119,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
-
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Toronto'
 USE_I18N = True
 
 USE_TZ = True
@@ -127,8 +128,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -157,8 +158,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3001",
     "http://localhost:3002",
     "https://spot-find.vercel.app",
+    'https://spotfinder.prakashpun.com.np',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://spotfinder.prakashpun.com.np',
+    # other origins
+]
 
 AUTH_USER_MODEL = 'api.CustomUser'
 

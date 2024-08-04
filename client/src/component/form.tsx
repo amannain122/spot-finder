@@ -39,7 +39,9 @@ export const LoginForm = () => {
     <>
       <form>
         <div className="mb-6">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">
+            Email<span className="text-red-500">*</span>
+          </Label>
           <Input
             type="email"
             id="email"
@@ -49,7 +51,9 @@ export const LoginForm = () => {
           />
         </div>
         <div className="mb-6">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">
+            Password<span className="text-red-500">*</span>
+          </Label>
           <Input
             type="password"
             required
@@ -114,6 +118,7 @@ export const RegisterForm = () => {
       router.push("/login");
     } else {
       const error = handleError(response.data);
+
       toast({ title: error || "Something went wrong" });
     }
     setLoading(false);
@@ -123,17 +128,22 @@ export const RegisterForm = () => {
     <>
       <form>
         <div className="mb-4">
-          <Label htmlFor="firstName">First Name</Label>
+          <Label htmlFor="firstName">
+            First Name<span className="text-red-500">*</span>
+          </Label>
           <Input
             type="text"
             id="firstName"
             placeholder=""
+            required
             value={data.first_name}
             onChange={(e) => setData({ ...data, first_name: e.target.value })}
           />
         </div>
         <div className="mb-4">
-          <Label htmlFor="lastName">Last Name</Label>
+          <Label htmlFor="lastName">
+            Last Name<span className="text-red-500">*</span>
+          </Label>
           <Input
             type="text"
             required
@@ -142,7 +152,9 @@ export const RegisterForm = () => {
           />
         </div>
         <div className="mb-6">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">
+            Email<span className="text-red-500">*</span>
+          </Label>
           <Input
             type="email"
             id="email"
@@ -152,7 +164,9 @@ export const RegisterForm = () => {
           />
         </div>
         <div className="mb-6">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">
+            Password<span className="text-red-500">*</span>
+          </Label>
           <Input
             type="password"
             required
