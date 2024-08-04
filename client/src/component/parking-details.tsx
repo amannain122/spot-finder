@@ -76,7 +76,6 @@ const ParkingDetail = () => {
       toast({ title: "This spot is already occupied" });
       return;
     }
-    console.log(spot);
     setSelectedSpot(spot);
     setDrawerOpen(true);
   };

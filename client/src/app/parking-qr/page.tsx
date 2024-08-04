@@ -8,7 +8,7 @@ export default function SettingsProfilePage() {
       <div className="flex gap-6 justify-center flex-wrap">
         <div className="text-center flex justify-center flex-col items-center p-3 bg-gray-50 rounded-lg shadow-md mb-4 cursor-pointer">
           <QRCodeSVG
-            value={"https://picturesofpeoplescanningqrcodes.tumblr.com"}
+            value={"https://spot-find.vercel.app/parking?id=PL01"}
             size={140}
             bgColor={"#ffffff"}
             fgColor={"#000000"}
@@ -30,7 +30,7 @@ export default function SettingsProfilePage() {
 
         <div className="text-center flex justify-center flex-col items-center p-2 bg-gray-50 rounded-lg shadow-md mb-4 cursor-pointer">
           <QRCodeSVG
-            value={"https://picturesofpeoplescanningqrcodes.tumblr.com"}
+            value={"https://spot-find.vercel.app/parking?id=PL02"}
             size={140}
             bgColor={"#ffffff"}
             fgColor={"#000000"}
@@ -51,7 +51,7 @@ export default function SettingsProfilePage() {
         </div>
         <div className="text-center flex justify-center flex-col items-center p-2 bg-gray-50 rounded-lg shadow-md mb-4 cursor-pointer">
           <QRCodeSVG
-            value={"https://picturesofpeoplescanningqrcodes.tumblr.com"}
+            value={"https://spot-find.vercel.app/parking?id=PL03"}
             size={140}
             bgColor={"#ffffff"}
             fgColor={"#000000"}
