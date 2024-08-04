@@ -1,4 +1,3 @@
-
 from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.middleware.csrf import get_token

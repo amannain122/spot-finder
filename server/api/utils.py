@@ -39,7 +39,6 @@ METADATA = [
     }
 ]
 
-
 async def query_athena(query, database, output_location):
     session = get_session()
     async with session.create_client('athena', region_name=AWS_S3_REGION_NAME,

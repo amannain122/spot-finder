@@ -41,6 +41,7 @@ export const Header = () => {
   }, []);
 
   console.log(token);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     router.push("/login");
@@ -138,6 +139,7 @@ export const Header = () => {
                       <img
                         alt=""
                         src="profile.jpg"
+
                         className="h-8 w-8 rounded-full"
                       />
                     </MenuButton>

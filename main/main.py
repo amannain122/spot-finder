@@ -129,9 +129,9 @@ def process_parking_lot(parking_lot_id, video_url, roi_csv_path, output_csv_path
             prev_empty_boxes = empty_boxes
 
         # Display the frame (commented out for non-interactive environments)
-        # cv2.imshow('Result', frame)
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-        #    break
+        cv2.imshow('Result', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+           break
 
     # Release video capture
     cap.release()
