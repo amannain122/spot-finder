@@ -1,17 +1,19 @@
-
+from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.middleware.csrf import get_token
+from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, DestroyAPIView, ListAPIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
+from rest_framework import status, permissions
 from rest_framework import serializers
 from rest_framework import permissions
 from rest_framework import status
+from cryptography.fernet import Fernet, InvalidToken
 from .serializers import UserSerializer, MyTokenObtaionPairSerializer, BookingSerializer, ParkingLotSerializer, AllBookingSerializer
-from .utils import METADATA, query_athena, get_query_results, results_to_dataframe
+from .utils import METADATA, query_athena, get_query_results, results_to_dataframe, merge_data
 from .models import User, Booking
 from cryptography.fernet import Fernet, InvalidToken
 from rest_framework.permissions import IsAuthenticated
@@ -19,7 +21,10 @@ from rest_framework.response import Response
 from rest_framework import status
 import environ
 from django.db.models import Case, When, Value, IntegerField
-
+from rest_framework.views import APIView
+from .serializers import ParkingLotSerializer
+import core.settings as set
+import environ
 
 env = environ.Env()
 
@@ -88,57 +93,70 @@ class UserView(APIView):
             return Response({"detail": "Error creating user", "error": str(exe)}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, format=None):
-        serializer = UserSerializer(
-            request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-def merge_data(metadata, spots):
-    parking_lots = []
-    for idx, lot in enumerate(metadata):
-        lot_spots = [spot for spot in spots if spot["ParkingLotID"]
-                     == lot["ParkingLotID"]]
-        spots_list = [{"spot": f"SP{i}", "status": lot_spots[0].get(
-            f"SP{i}", "empty")} for i in range(1, 24)]
-        coordinates = {"latitude": 0.0, "longitude": 0.0}
-        if lot["Location"]:
-            lat, lon = map(float, lot["Location"].split(","))
-            coordinates = {"latitude": lat, "longitude": lon}
-        total_spots = lot["Number of Spots"]
-        available_spots = sum(
-            1 for spot in spots_list if spot["status"] == "empty")
-        reserved_spots = total_spots - available_spots
-        parking_lots.append({
-            "id": idx + 1,
-            "parking_id": lot["ParkingLotID"],
-            "coordinates": coordinates,
-            "total_spots": total_spots,
-            "available_spots": available_spots,
-            "reserved_spots": reserved_spots,
-            "address": lot["Address"],
-            "image": lot["URL"],
-            "spots": spots_list
-        })
-    return parking_lots
+        try:
+            user = User.objects.get(id=request.user.id)
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            return Response({"detail": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ParkingListView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        query = "SELECT * FROM athena_spot_finder.parking_lots;"
-        database = "sample_db"
+        cache_key = 'parking_lots_data'
+
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            # Update spot status from cache before returning it
+            self.update_spot_status(cached_data)
+            cache.set(cache_key, cached_data, timeout=3600)
+            return Response(cached_data)
+
+        # Convert async function calls to sync using async_to_sync
+        query = 'SELECT * FROM "AwsDataCatalog"."spotfinder-schema"."parking_list_lots"'
+        database = 'spotfinder-schema'
         output_location = "s3://spotfinder-data-bucket/Athena_output/"
-        query_execution_id = query_athena(query, database, output_location)
-        results = get_query_results(query_execution_id)
+
+        query_execution_id = async_to_sync(query_athena)(
+            query, database, output_location)
+        results = async_to_sync(get_query_results)(query_execution_id)
 
         spots_data = results_to_dataframe(results)
+
         data = merge_data(METADATA, spots_data)
+        self.update_spot_status(data)
+
         serializer = ParkingLotSerializer(data, many=True)
+
+        cache.set(cache_key, serializer.data, timeout=3600)
+
         return Response(serializer.data)
+
+    def update_spot_status(self, data):
+        for lot in data:
+            parking_id = lot['parking_id']
+            available_spots_count = lot.get('available_spots', 0)
+            reserved_spots_count = lot.get('reserved_spots', 0)
+
+            for spot in lot['spots']:
+                spot_id = spot['spot']
+                booking = Booking.objects.filter(
+                    parking_id=parking_id, parking_spot=spot_id, booking_status="booked").first()
+
+                if booking and spot['status'] == 'empty':
+                    spot['status'] = 'occupied'
+                    available_spots_count -= 1
+                    reserved_spots_count += 1
+
+            lot['available_spots'] = available_spots_count
+            lot['reserved_spots'] = reserved_spots_count
 
 
 class ParkingLotView(APIView):
@@ -146,27 +164,82 @@ class ParkingLotView(APIView):
     PARKING_LOT_CHOICES = ['PL01', 'PL02', 'PL03']
 
     def get(self, request, parking_lot_id=None):
+        cache_key = 'parking_status_lots_data'
+        cached_data = cache.get(cache_key)
+
         if parking_lot_id and parking_lot_id.upper() not in self.PARKING_LOT_CHOICES:
             return Response({"error": "Parking Detail Not Found"}, status=status.HTTP_400_BAD_REQUEST)
-        query = "SELECT * FROM athena_spot_finder.parking_lots;"
-        database = "sample_db"
+
+        if cached_data:
+            if parking_lot_id:
+                parking_lot = next(
+                    (lot for lot in cached_data if lot["parking_id"] == parking_lot_id.upper()), None)
+                if parking_lot:
+                    self.update_spot_status(parking_lot)
+                    cache.set(cache_key, cached_data, timeout=3600)
+                    serializer = ParkingLotSerializer(parking_lot)
+                    return Response(serializer.data)
+                else:
+                    return Response({"error": "Parking lot not found"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                for lot in cached_data:
+                    self.update_spot_status(lot)
+                cache.set(cache_key, cached_data, timeout=3600)
+                return Response(cached_data)
+
+        query = 'SELECT * FROM "AwsDataCatalog"."spotfinder-schema"."parking_list_lots"'
+        database = 'spotfinder-schema'
         output_location = "s3://spotfinder-data-bucket/Athena_output/"
-        query_execution_id = query_athena(query, database, output_location)
-        results = get_query_results(query_execution_id)
+        query_execution_id = async_to_sync(query_athena)(
+            query, database, output_location)
+        results = async_to_sync(get_query_results)(query_execution_id)
         spots_data = results_to_dataframe(results)
 
         data = merge_data(METADATA, spots_data)
+
         if parking_lot_id:
             parking_lot = next(
                 (lot for lot in data if lot["parking_id"] == parking_lot_id.upper()), None)
             if parking_lot:
+                self.update_spot_status(parking_lot)
                 serializer = ParkingLotSerializer(parking_lot)
+                cache.set(cache_key, data, timeout=3600)
                 return Response(serializer.data)
             else:
                 return Response({"error": "Parking lot not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
+            for lot in data:
+                self.update_spot_status(lot)
             serializer = ParkingLotSerializer(data, many=True)
+            cache.set(cache_key, data, timeout=3600)
             return Response(serializer.data)
+
+    def update_spot_status(self, parking_lot):
+        parking_id = parking_lot['parking_id']
+        initial_available_spots = parking_lot.get('available_spots', 0)
+        initial_reserved_spots = parking_lot.get('reserved_spots', 0)
+
+        for spot in parking_lot['spots']:
+            spot_id = spot['spot']
+            # Checking if there's a 'booked' status or 'canceled' status for this parking lot and spot
+            booking = Booking.objects.filter(
+                parking_id=parking_id, parking_spot=spot_id).order_by('-updated_at').first()
+
+            if booking:
+                if booking.booking_status == "booked":
+                    if spot['status'] == 'empty':
+                        spot['status'] = 'occupied'
+                        initial_available_spots -= 1
+                        initial_reserved_spots += 1
+                elif booking.booking_status == "canceled":
+                    if spot['status'] == 'occupied':
+                        spot['status'] = 'empty'
+                        initial_reserved_spots -= 1
+                        initial_available_spots += 1
+
+                # Update the parking lot's available_spots and reserved_spots counts
+        parking_lot['available_spots'] = initial_available_spots
+        parking_lot['reserved_spots'] = initial_reserved_spots
 
 
 class BookingViewSet(ListCreateAPIView):
@@ -188,6 +261,17 @@ class BookingViewSet(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = BookingSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
+            # Check if the user has already booked the spot
+            if Booking.objects.filter(user=request.user, booking_status='booked').exists():
+                return Response({"detail": "You have already booked a parking spot."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if the parking spot is already booked
+            parking_spot = request.data.get('parking_spot')
+            parking_id = request.data.get('parking_id')
+
+            if Booking.objects.filter(parking_spot=parking_spot, parking_id=parking_id, booking_status='booked').exists():
+                return Response({"detail": "This parking spot is already booked. Please choose another spot."}, status=status.HTTP_400_BAD_REQUEST)
+
             note = serializer.save()
             if note:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
