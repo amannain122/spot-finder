@@ -118,6 +118,7 @@ export const RegisterForm = () => {
       router.push("/login");
     } else {
       const error = handleError(response.data);
+
       toast({ title: error || "Something went wrong" });
     }
     setLoading(false);

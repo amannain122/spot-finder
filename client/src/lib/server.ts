@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 
 // backend server url
 export const BASE_URL =
-  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_SERVER_URL || "http://107.21.53.156";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -156,18 +156,20 @@ export const handleError = (err: any, showToast = true) => {
         return err?.response?.data?.detail || "";
       }
       const keys = Object.keys(err.response.data);
+      let errorMessages = "";
       keys.forEach((item) => {
-        if (item === "detail") {
+        if (item === "image") {
           const newObj = err.response.data[item];
-          if (typeof err.response.data[item] === "object") {
-            Object.keys(newObj).forEach((itm) => {
-              return newObj[itm];
-            });
-          } else {
-            return err.response.data[item];
-          }
+          Object.keys(newObj).forEach((itm) => {
+            errorMessages += `${itm.toUpperCase()}: ${newObj[itm]} \n`;
+          });
+        } else {
+          errorMessages += `${item.toUpperCase()}: ${
+            err.response.data[item]
+          } \n`;
         }
       });
+      return errorMessages.trim();
     } else {
       return `Error with Status code : ${err.response.status}`;
     }

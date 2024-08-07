@@ -1,5 +1,6 @@
 # Base image
-FROM python:3.9-slim
+FROM python:3.10-slim
+
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -16,4 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Run migrations and collect static files
-CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py makemigrations &&  python manage.py makemigrations api && python manage.py migrate && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"]
+
+# Expose the port server is running on
+# EXPOSE 8000

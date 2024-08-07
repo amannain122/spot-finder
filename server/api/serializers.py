@@ -147,7 +147,7 @@ class BookingSerializer(serializers.ModelSerializer):
 
     def validate_parking_spot(self, value):
         request = self.context['request']
-        if Booking.objects.filter(parking_spot=value, user=request.user).exists():
+        if Booking.objects.filter(parking_spot=value, user=request.user, booking_status="booked").exists():
             raise serializers.ValidationError(
                 "You have already booked this parking spot.")
         return value
