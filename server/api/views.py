@@ -265,7 +265,8 @@ class BookingViewSet(ListCreateAPIView):
             if Booking.objects.filter(user=request.user, booking_status='booked').exists():
                 return Response({"detail": "You have already booked a parking spot."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Check if the parking spot is already booked
+             # Check if the parking spot is already booked
+
             parking_spot = request.data.get('parking_spot')
             parking_id = request.data.get('parking_id')
 
