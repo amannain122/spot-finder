@@ -1,0 +1,13 @@
+Dashboard Files Overview
+Main File:
+
+ 
+Purpose: This file likely serves as a preliminary or conceptual model for how the final dashboard should look and function. It may have been used to experiment with visualizations, layout, and design choices before working with real data.
+Secondary File:
+
+Data Source: Also built using dummy data.
+Purpose: This file could be an intermediary step, where additional features or refinements were tested. It might include more advanced visualizations, filters, or interactions that were considered after the initial version. It might have been used to further iterate on the dashboard design and to test different aspects of the data model or visualizations.
+Final File:
+
+Data Source: Built using real data.
+Purpose: This is the final version of the dashboard, incorporating all the lessons learned and design decisions from the Main and Secondary files. It uses real data to provide accurate and actionable insights, and it’s the version that would be used for presentation or deployment.
